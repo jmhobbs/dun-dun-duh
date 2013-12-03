@@ -3,6 +3,9 @@ import random
 from flask import Flask, request, redirect, url_for, render_template, send_from_directory, abort
 from werkzeug import secure_filename
 from PIL import Image
+from PIL import GifImagePlugin
+import itertools
+import struct
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
 
@@ -16,6 +19,47 @@ LONGEST_SIDE = 400
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 4 * 1024 * 1024
+
+
+# https://github.com/GoogleCloudPlatform/appengine-mandelbrot-python/blob/master/mandelbrot_animation.py
+def build_animated_gif(stream, images, delays):
+    """Writes an animated GIF into a stream given an iterator of PIL.Images.
+
+    See http://en.wikipedia.org/wiki/Graphics_Interchange_Format#Animated_GIF.
+    """
+    image = images[0]
+
+    # Header
+    stream.write("GIF89a")
+
+    # Logical Screen Descriptor
+    stream.write(struct.pack('<H', image.size[0]))
+    stream.write(struct.pack('<H', image.size[1]))
+    stream.write("\x87\x00\x00")
+
+    # Palette
+    stream.write(GifImagePlugin.getheader(image)[1])
+
+    # Application Extension
+    stream.write("\x21\xFF\x0B")
+    stream.write("NETSCAPE2.0")
+    stream.write("\x03\x01")
+    stream.write(struct.pack('<H', 2 ** 16 - 1))
+    stream.write('\x00')
+
+    for i in xrange(1, len(images)):
+        # Graphic Control Extension
+        stream.write('\x21\xF9\x04')
+        stream.write('\x08')
+        stream.write(struct.pack('<H', delays[i]))
+        stream.write('\x00\x00')
+
+        data = GifImagePlugin.getdata(images[i])
+        for d in data:
+            stream.write(d)
+
+    # GIF file terminator
+    stream.write(";")
 
 
 def random_prefix(length=10):
@@ -128,8 +172,15 @@ def compose(filename):
 
     print frames
 
+    _frames = []
+
     for i in xrange(0, 5):
-        im.crop(frames[i]).resize((peak_size, peak_size)).save(os.path.join(app.config['UPLOAD_FOLDER'], str(i) + '_' + filename), 'JPEG')
+        frame = im.crop(frames[i]).resize((peak_size, peak_size))
+        frame.save(os.path.join(app.config['UPLOAD_FOLDER'], str(i) + '_' + filename), 'JPEG')
+        _frames.append(frame.convert('P'))
+
+    with open(os.path.join(app.config['UPLOAD_FOLDER'], filename + '.gif'), 'wb') as handle:
+            build_animated_gif(handle, _frames, (25, 25, 25, 25, 100))
 
     return render_template('compose.html', filename=filename)
 
