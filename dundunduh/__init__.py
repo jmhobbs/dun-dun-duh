@@ -1,112 +1,28 @@
 # -*- coding: utf-8 -*-
 
 import os
-import random
 from flask import Flask, request, redirect, url_for, render_template, send_from_directory, abort
 from werkzeug import secure_filename
 from PIL import Image
-from PIL import GifImagePlugin
-import struct
-import subprocess
-import tempfile
+
+from .util import is_allowed_file, random_alphanumeric_string
+from .renderers.gifsicle import make_animated_gif
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
-
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
-
-ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-ALPHABET_LEN = len(ALPHABET)
-
 LONGEST_SIDE = 400
 
 app = Flask(__name__)
+
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 4 * 1024 * 1024
-
-
-def build_animated_gif_with_gifsicle(stream, images, delays):
-    # gifsicle -m -O2 --dither --colors 128 --loopcount=forever -d25 0.gif 1.gif 2.gif 3.gif -d50 > out.gif
-    command = ['gifsicle', '-m', '-O2', '--dither', '--colors', '128', '--loopcount=forever']
-
-    temp_files = []
-    i = 0
-    for image in images:
-        temp = tempfile.NamedTemporaryFile(suffix=".gif")
-        image.save(temp)
-        command.append('-d%d' % delays[i])
-        command.append(temp.name)
-        i += 1
-        temp_files.append(temp)
-
-    print 'Calling:', command
-
-    subprocess.call(command, stdout=stream)
-
-    for temp in temp_files:
-        temp.close()
-
-    del temp_files
-
-
-
-# https://github.com/GoogleCloudPlatform/appengine-mandelbrot-python/blob/master/mandelbrot_animation.py
-def build_animated_gif(stream, images, delays):
-    """Writes an animated GIF into a stream given an iterator of PIL.Images.
-
-    See http://en.wikipedia.org/wiki/Graphics_Interchange_Format#Animated_GIF.
-    """
-    image = images[0]
-
-    # Header
-    stream.write("GIF89a")
-
-    # Logical Screen Descriptor
-    stream.write(struct.pack('<H', image.size[0]))
-    stream.write(struct.pack('<H', image.size[1]))
-    stream.write("\x87\x00\x00")
-
-    # Palette
-    stream.write(GifImagePlugin.getheader(image)[1])
-
-    # Application Extension
-    stream.write("\x21\xFF\x0B")
-    stream.write("NETSCAPE2.0")
-    stream.write("\x03\x01")
-    stream.write(struct.pack('<H', 2 ** 16 - 1))
-    stream.write('\x00')
-
-    for i in xrange(1, len(images)):
-        # Graphic Control Extension
-        stream.write('\x21\xF9\x04')
-        stream.write('\x08')
-        stream.write(struct.pack('<H', delays[i]))
-        stream.write('\x00\x00')
-
-        data = GifImagePlugin.getdata(images[i])
-        for d in data:
-            stream.write(d)
-
-    # GIF file terminator
-    stream.write(";")
-
-
-def random_prefix(length=10):
-    prefix = []
-    for i in xrange(0, length):
-        prefix.append(ALPHABET[random.randrange(0, ALPHABET_LEN)])
-    return ''.join(prefix)
-
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
         file = request.files['file']
-        if file and allowed_file(file.filename):
-            filename = random_prefix() + '_' + secure_filename(file.filename).replace('.', '_') + '.jpg'
+        if file and is_allowed_file(file.filename):
+            filename = random_alphanumeric_string(10) + '_' + secure_filename(file.filename).replace('.', '_') + '.jpg'
             im = Image.open(file)
             w, h = im.size
             if w > LONGEST_SIDE or h > LONGEST_SIDE:
@@ -207,10 +123,6 @@ def compose(filename):
         _frames.append(frame.convert('P'))
 
     with open(os.path.join(app.config['UPLOAD_FOLDER'], filename + '.gif'), 'wb') as handle:
-            build_animated_gif_with_gifsicle(handle, _frames, (35, 35, 35, 35, 250))
-#            build_animated_gif(handle, _frames, (25, 25, 25, 25, 100))
+            make_animated_gif(handle, _frames, (35, 35, 35, 35, 250))
 
     return render_template('compose.html', filename=filename)
-
-if __name__ == '__main__':
-    app.run(port=5050, debug=True)
