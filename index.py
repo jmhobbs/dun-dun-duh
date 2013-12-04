@@ -1,11 +1,14 @@
+# -*- coding: utf-8 -*-
+
 import os
 import random
 from flask import Flask, request, redirect, url_for, render_template, send_from_directory, abort
 from werkzeug import secure_filename
 from PIL import Image
 from PIL import GifImagePlugin
-import itertools
 import struct
+import subprocess
+import tempfile
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
 
@@ -19,6 +22,31 @@ LONGEST_SIDE = 400
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 4 * 1024 * 1024
+
+
+def build_animated_gif_with_gifsicle(stream, images, delays):
+    # gifsicle -m -O2 --dither --colors 128 --loopcount=forever -d25 0.gif 1.gif 2.gif 3.gif -d50 > out.gif
+    command = ['gifsicle', '-m', '-O2', '--dither', '--colors', '128', '--loopcount=forever']
+
+    temp_files = []
+    i = 0
+    for image in images:
+        temp = tempfile.NamedTemporaryFile(suffix=".gif")
+        image.save(temp)
+        command.append('-d%d' % delays[i])
+        command.append(temp.name)
+        i += 1
+        temp_files.append(temp)
+
+    print 'Calling:', command
+
+    subprocess.call(command, stdout=stream)
+
+    for temp in temp_files:
+        temp.close()
+
+    del temp_files
+
 
 
 # https://github.com/GoogleCloudPlatform/appengine-mandelbrot-python/blob/master/mandelbrot_animation.py
@@ -176,11 +204,11 @@ def compose(filename):
 
     for i in xrange(0, 5):
         frame = im.crop(frames[i]).resize((peak_size, peak_size))
-        frame.save(os.path.join(app.config['UPLOAD_FOLDER'], str(i) + '_' + filename), 'JPEG')
         _frames.append(frame.convert('P'))
 
     with open(os.path.join(app.config['UPLOAD_FOLDER'], filename + '.gif'), 'wb') as handle:
-            build_animated_gif(handle, _frames, (25, 25, 25, 25, 100))
+            build_animated_gif_with_gifsicle(handle, _frames, (35, 35, 35, 35, 250))
+#            build_animated_gif(handle, _frames, (25, 25, 25, 25, 100))
 
     return render_template('compose.html', filename=filename)
 
