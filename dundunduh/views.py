@@ -38,6 +38,11 @@ def register_views(app):
     def uploaded_file(filename):
         return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+    @app.route('/robots.txt')
+    @app.route('/humans.txt')
+    def root_level_static_files():
+        return send_from_directory(app.static_folder, request.path[1:])
+
     @app.route('/crop/<filename>/<int:width>/<int:height>')
     def crop_file(filename, width, height):
 
