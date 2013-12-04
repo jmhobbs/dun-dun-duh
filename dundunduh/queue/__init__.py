@@ -1,11 +1,26 @@
 # -*- coding: utf-8 -*-
 
 import os
-from PIL import Image
+from PIL import Image, ImageFilter
 
 from flask import current_app, url_for
 
 from ..renderers.gifsicle import make_animated_gif
+
+# HACK
+# In PIL 1.1.7 the blur kernel is hard coded small, so we hack it
+# http://aaronfay.ca/content/post/python-pil-and-gaussian-blur/
+# https://bugs.launchpad.net/phatch/+bug/528702
+class VariableGaussianBlur(ImageFilter.Filter):
+    name = "GaussianBlur"
+
+    def __init__(self, radius=2):
+        self.radius = radius
+
+    def filter(self, image):
+        return image.gaussian_blur(self.radius)
+
+BLUR_FILTER = VariableGaussianBlur(radius=10)
 
 
 def compose_animated_gif(filename, x, y, size):
@@ -74,6 +89,9 @@ def compose_animated_gif(filename, x, y, size):
 
     for i in xrange(0, 5):
         frame = im.crop(frames[i]).resize((peak_size, peak_size))
+        # TODO: Blur should be relative to total zoom, not just frame #
+        if i > 2:
+            frame = frame.filter(VariableGaussianBlur(i))
         _frames.append(frame.convert('P'))
 
     output_filename = os.path.join(current_app.config['UPLOAD_FOLDER'], filename.replace('.jpg', '.gif'))
