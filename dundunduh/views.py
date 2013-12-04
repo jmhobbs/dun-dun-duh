@@ -117,4 +117,4 @@ def register_views(app):
         with open(os.path.join(app.config['UPLOAD_FOLDER'], filename.replace('.jpg', '.gif')), 'wb') as handle:
                 make_animated_gif(handle, _frames, (35, 35, 35, 35, 250))
 
-        return render_template('compose.html', filename=filename)
+        return render_template('compose.html', filename=filename.replace('.jpg', '.gif'))
