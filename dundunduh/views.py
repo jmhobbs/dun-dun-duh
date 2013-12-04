@@ -94,13 +94,26 @@ def register_views(app):
             y2 = int(center_point[1] + frame_size * .5)
 
             # Push centerpoint inward if out of bounds
+            if x2 >= w:
+                print "x2 outside width by", x2 - w
+                x1 = x1 - (x2 - w)
+                x2 = w
+
+            if y2 >= h:
+                print "y2 outside height by", y2 - h
+                y1 = y1 - (y2 - h)
+                y2 = h
+
             if x1 < 0:
+                print 'x1 outside 0 by', x1
                 x2 = x2 + (-1 * x1)
                 x1 = 0
 
             if y1 < 0:
+                print 'y1 outside 0 by', y1
                 y2 = y2 + (-1 * y1)
                 y1 = 0
+
 
             frames.append((x1, y1, x2, y2))
 
