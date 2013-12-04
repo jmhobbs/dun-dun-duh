@@ -5,6 +5,42 @@
 	</head>
 	<body>
 		<h2><a href="{{ url_for("upload_file") }}">Start over...</a></h2>
-		<img src="{{ url_for("uploaded_file", filename=filename) }}" alt="gif" title="gif" />
+		<p id="status">Processing...</p>
+		<script src="{{ url_for("static", filename="jcrop/js/jquery.min.js") }}"></script>
+		<script>
+			jQuery(function ($) {
+				var job_id = "{{ job_id }}";
+
+				function checkJob () {
+					$.getJSON(
+						'/job/status.json',
+						{id: job_id}
+					)
+					.success(function (data) {
+						console.log(data);
+						if( data.error ) {
+							$('#status').text('Error Rendering: ' + data.message);
+						}
+						else {
+							if( data.data.failed ) {
+								$('#status').text('Rendering Failed :-(');
+							}
+							else if( data.data.finished ) {
+								$('#status').html($('<img/>').attr('src', data.data.return_value.url));
+							}
+							else {
+								setTimeout(checkJob, 250);
+							}
+						}
+					})
+					.error(function (e) {
+						console.log(e);
+						$('#status').text('Rendering Failed :-(');
+					});
+				}
+
+				checkJob();
+			});
+		</script>
 	</body>
 </html>
