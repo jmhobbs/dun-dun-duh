@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block head %}
-<link rel="stylesheet" href="{{ url_for("static", filename="jcrop/css/jquery.Jcrop.min.css") }}" type="text/css" />
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jquery-jcrop/0.9.12/css/jquery.Jcrop.min.css" type="text/css" />
 {% endblock %}
 
 {% block body %}
@@ -16,7 +16,7 @@
 {% endblock %}
 
 {% block script %}
-	<script src="{{ url_for("static", filename="jcrop/js/jquery.Jcrop.min.js") }}"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-jcrop/0.9.12/js/jquery.Jcrop.min.js"></script>
 	<script>
 		$(function () {
 			$('#base-image').Jcrop({
