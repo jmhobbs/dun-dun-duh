@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+	<head>
+		<title>{% block title %}{% endblock %}dun-dun-DUH!</title>
+		<style>
+			body {
+				background: #222;
+				color: #FFF;
+			}
+		</style>
+		{% block head %}{% endblock %}
+	</head>
+	<body>
+		{% block body %}{% endblock %}
+		<script src="{{ url_for("static", filename="jcrop/js/jquery.min.js") }}"></script>
+		{% block script %}{% endblock %}
+	</body>
+</html>
