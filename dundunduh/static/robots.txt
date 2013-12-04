@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /admin
+Disallow: /static
+Disallow: /upload
+Disallow: /crop
+Disallow: /compose
+Disallow: /job/status.json
