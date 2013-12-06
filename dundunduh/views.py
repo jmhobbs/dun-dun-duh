@@ -67,7 +67,10 @@ def register_views(app):
         if x is None or y is None or size is None:
             abort(400)
 
-        job = flask.ext.rq.get_queue('default').enqueue(compose_animated_gif, filename, x, y, size)
+        center_x = x + int(size * 0.5)
+        center_y = y + int(size * 0.5)
+
+        job = flask.ext.rq.get_queue('default').enqueue(compose_animated_gif, filename, center_x, center_y, size)
 
         return render_template('compose.html', job_id=job.id)
 
