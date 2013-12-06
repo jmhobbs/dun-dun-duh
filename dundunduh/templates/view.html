@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+
+{% block body %}
+	<h1>DUN-DUH-DUH!</h1>
+	<div style="text-align: center;">
+		<p>
+			<img src="{{ url_for("uploaded_file", filename=filename) }}" alt="Loading..." />
+		</p>
+		<p><a class="btn btn-primary" href="{{ url_for("upload_file") }}">Make A New GIF</a></p>
+	</div>
+{% endblock %}

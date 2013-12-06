@@ -74,6 +74,10 @@ def register_views(app):
 
         return render_template('compose.html', job_id=job.id)
 
+    @app.route('/gif/<filename>')
+    def view(filename):
+        return render_template('view.html', filename=filename)
+
     @app.route('/job/status.json')
     def rq_job_status():
         if not request.args.get('id'):

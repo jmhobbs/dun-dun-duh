@@ -47,4 +47,8 @@ def compose_animated_gif(filename, x, y, size):
     with open(output_filename, 'wb') as handle:
             make_animated_gif(handle, frames, (35, 35, 35, 35, 250))
 
-    return {"filename": filename.replace(".jpg", ".gif"), "url": url_for('uploaded_file', filename=filename.replace('.jpg', '.gif'))}
+    return {
+        "filename": filename.replace(".jpg", ".gif"),
+        "view_url": url_for('view', filename=filename.replace('.jpg', '.gif')),
+        "image_url": url_for('uploaded_file', filename=filename.replace('.jpg', '.gif'))
+    }

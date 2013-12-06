@@ -1,7 +1,12 @@
-body {
-	background: #222;
-	color: #FFF;
+h1 {
+	text-align: center;
 }
 a, a:link, a:hover, a:visited {
 	color: #FFF;
+}
+.jcrop-holder {
+	margin: 0 auto;
+}
+.compose-row {
+	margin-top: 25%;
 }

@@ -4,8 +4,12 @@
 <h1>DUN</h1>
 <h1>DUN</h1>
 <h1>DUH!</h1>
-<form action="" method=post enctype=multipart/form-data>
-	<input type=file name=file>
-	<input type=submit value=Upload>
+<form action="" method="POST" enctype="multipart/form-data" role="form">
+	<div class="form-group">
+		<label for="file">Select your photo!</label>
+		<input type="file" name="file" id="file" />
+		<p class="help-block">JPG/GIF/PNG - 6MB Tops</p>
+	</div>
+	<button type="submit" class="btn">Next &raquo;</button>
 </form>
 {% endblock %}

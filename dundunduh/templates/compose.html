@@ -1,40 +1,82 @@
 {% extends "layout.html" %}
 
 {% block body %}
-		<h2><a href="{{ url_for("upload_file") }}">Start over...</a></h2>
-		<p id="status">Processing...</p>
+	<div class="row compose-row">
+		<div id="error" class="alert alert-danger" style="display: none;">
+			<strong>Well Crap.</strong>
+			Something went wrong and your GIF was lost forever into the dark abyss.  Sorry.  Please don't be mad.<br/>
+		</div>
+		<div id="progress" class="progress progress-striped active">
+    	<div class="progress-bar" style="width: 100%"></div>
+		</div>
+		<p id="status" class="help-block" style="text-align: center;"></p>
+	</div>
 {% endblock %}
 
 {% block script %}
 <script>
 	jQuery(function ($) {
-		var job_id = "{{ job_id }}";
+		var job_id = "{{ job_id }}", loop_count = 0;
+
+		var messages = [
+			'Uploading Pixels',
+			'Grokking Polar Coordinates',
+			'Reticulating Splines',
+			'Adjusting Bell Curves',
+			'Tweeting Your Home Address',
+			'Googling For Jokes',
+			'Blitting Image Maps',
+			'Starting Photoshop',
+			'Enhancing EXIF Data',
+			'Licensing GIF89a',
+			'Booting Gaussian Blur Kernel',
+			'Blogging Haar Cascades'
+		];
+
+		function updateProgress () {
+			$('#status').fadeOut('fast', function () {
+				$(this).text(messages[Math.floor(Math.random() * messages.length)]);
+				$(this).fadeIn('fast');
+			});
+		}
+
+		function fail (message) {
+			$('#progress').slideUp();
+			$('#error').slideDown();
+			$('#status').stop().show().text(message).append($('<p/>').append($('<a/>').attr('href', '{{ url_for("upload_file") }}').text('Try Again?')));
+		}
 
 		function checkJob () {
+			updateProgress();
 			$.getJSON(
 				'/job/status.json',
 				{id: job_id}
 			)
 			.success(function (data) {
-				console.log(data);
 				if( data.error ) {
-					$('#status').text('Error Rendering: ' + data.message);
+					fail(message);
 				}
 				else {
 					if( data.data.failed ) {
-						$('#status').text('Rendering Failed :-(');
+						fail('');
 					}
 					else if( data.data.finished ) {
-						$('#status').html($('<img/>').attr('src', data.data.return_value.url));
+						window.location.href = data.data.return_value.view_url;
 					}
 					else {
-						setTimeout(checkJob, 250);
+						if( ++loop_count > 5 ) {
+							console.log(loop_count);
+							fail("Too many people using the service!");
+							// TODO: Cancel job?
+						}
+						else {
+							setTimeout(checkJob, 1000);
+						}
 					}
 				}
 			})
 			.error(function (e) {
-				console.log(e);
-				$('#status').text('Rendering Failed :-(');
+				fail('');
 			});
 		}
 
