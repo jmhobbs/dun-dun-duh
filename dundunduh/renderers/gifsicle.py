@@ -6,7 +6,7 @@ import subprocess
 
 def make_animated_gif(stream, images, delays):
     # gifsicle -m -O2 --dither --colors 128 --loopcount=forever -d25 0.gif 1.gif 2.gif 3.gif -d50 > out.gif
-    command = ['gifsicle', '-m', '-O2', '--dither', '--colors', '128', '--loopcount=forever']
+    command = ['gifsicle', '-m', '-O2', '--dither', '--colors', '255', '--loopcount=forever']
 
     temp_files = []
     i = 0
