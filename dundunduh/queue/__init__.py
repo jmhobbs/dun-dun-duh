@@ -25,27 +25,31 @@ class VariableGaussianBlur(ImageFilter.Filter):
 BLUR_FILTER = VariableGaussianBlur(radius=10)
 
 
-def compose_animated_gif(filename, x, y, size):
+def compose_animated_gif(filename, x, y, size, frame_count):
 
     im = Image.open(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
     w, h = im.size
 
     final_size = min(w, h, current_app.config.get('LONGEST_SIDE', 400))
 
-    crops = build_crops(w, h, x, y, size, 5)
+    crops = build_crops(w, h, x, y, size, frame_count)
 
+    times = []
     frames = []
 
-    for i in xrange(0, 5):
+    for i in xrange(0, frame_count):
         frame = im.crop(crops[i]).resize((final_size, final_size))
-        if i > 1:
+        if i > 0:
             frame = frame.filter(VariableGaussianBlur(i * 0.5))
         frames.append(frame.convert('P'))
+        times.append(35)
+
+    times[-1] = 250
 
     output_filename = os.path.join(current_app.config['UPLOAD_FOLDER'], filename.replace('.jpg', '.gif'))
 
     with open(output_filename, 'wb') as handle:
-            make_animated_gif(handle, frames, (35, 35, 35, 35, 250))
+            make_animated_gif(handle, frames, times)
 
     return {
         "filename": filename.replace(".jpg", ".gif"),

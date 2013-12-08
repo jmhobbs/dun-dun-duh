@@ -58,8 +58,9 @@ def register_views(app):
 
         return render_template('crop.html', filename=filename, size=size, max_size=max_size, x=x, y=y)
 
-    @app.route('/compose/<filename>', methods=('POST',))
+    @app.route('/render/<filename>', methods=('POST',))
     def compose(filename):
+        frames = request.form.get('frames', 5, type=int)
         x = request.form.get('x', type=int)
         y = request.form.get('y', type=int)
         size = request.form.get('size', type=int)
@@ -67,10 +68,15 @@ def register_views(app):
         if x is None or y is None or size is None:
             abort(400)
 
+        if frames < 3:
+            frames = 3
+        elif frames > 7:
+            frames = 7
+
         center_x = x + int(size * 0.5)
         center_y = y + int(size * 0.5)
 
-        job = flask.ext.rq.get_queue('default').enqueue(compose_animated_gif, filename, center_x, center_y, size)
+        job = flask.ext.rq.get_queue('default').enqueue(compose_animated_gif, filename, center_x, center_y, size, frames)
 
         return render_template('compose.html', job_id=job.id)
 

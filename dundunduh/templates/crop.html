@@ -7,9 +7,22 @@
 {% block body %}
 <h1>Select Focus Area</h1>
 <div style="text-align: center;">
-	<img src="{{ url_for("uploaded_file", filename=filename) }}" alt="Loading..." id="base-image" />
 	<p class="help-block">This is the final frame of your GIF, what we zoom in to.</p>
+	<img src="{{ url_for("uploaded_file", filename=filename) }}" alt="Loading..." id="base-image" />
+	<p><a href="#" id="show-options">(More Options)</a></p>
 	<form method="POST" action="{{ url_for("compose", filename=filename) }}">
+		<div class="col-md-4 col-md-offset-4" id="options" style="display: none;">
+			<div class="form-group">
+				<label for="frames">How many frames?</label>
+				<select name="frames" class="form-control">
+					<option>3</option>
+					<option>4</option>
+					<option selected="selected">5</option>
+					<option>6</option>
+					<option>7</option>
+				</select>
+			</div><!-- form-group -->
+		</div>
 		<input type="hidden" name="x" value="{{ x }}" />
 		<input type="hidden" name="y" value="{{ y }}" />
 		<input type="hidden" name="size" value="{{ size }}" />
@@ -22,6 +35,11 @@
 	<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-jcrop/0.9.12/js/jquery.Jcrop.min.js"></script>
 	<script>
 		$(function () {
+
+			$('#show-options').on('click', function () {
+				$(this).slideUp(function () { $('#options').slideDown(); });
+			});
+
 			$('#base-image').Jcrop({
 				aspectRatio: 1,
 				minSize: [10, 10],
