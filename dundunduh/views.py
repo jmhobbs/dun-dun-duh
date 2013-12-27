@@ -88,8 +88,8 @@ def register_views(app):
 
     @app.route('/gif/<filename>')
     def view(filename):
-        if 's3' == app.config.get('UPLOAD_DESTINATION', 'local'):
-            image_url = u'http://s3.amazonaws.com/%s/%s.gif' % (app.config['S3_BUCKET'], filename)
+        if app.config.get('UPLOAD_URL_FORMAT_STRING'):
+            image_url = app.config.get('UPLOAD_URL_FORMAT_STRING') % {"filename": filename, "extension": ".gif"}
         else:
             image_url = url_for('uploaded_file', filename=filename + ".gif", _external=True)
         return render_template('view.html', image_url=image_url)

@@ -14,6 +14,7 @@ class BaseConfig(object):
     AWS_ACCESS_KEY = None
     AWS_SECRET_KEY = None
     S3_BUCKET = None
+    UPLOAD_URL_FORMAT_STRING = None
 
     # Max POST request size
     MAX_CONTENT_LENGTH = 6 * 1024 * 1024  # 6MB

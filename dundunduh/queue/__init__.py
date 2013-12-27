@@ -62,4 +62,7 @@ def publishToS3(filename, content_type):
     key = Key(bucket, name)
     key.set_contents_from_filename(filename, headers={'Content-Type': content_type, 'Cache-Control': 'max-age %d' % (3600 * 24 * 365)}, policy='public-read')
 
-    return u'http://%s.s3.amazon.com/%s' % (current_app.config['S3_BUCKET'], name)
+    if current_app.config.get('UPLOAD_URL_FORMAT_STRING'):
+        return current_app.config.get('UPLOAD_URL_FORMAT_STRING') % {"filename": filename, "extension": ".gif"}
+    else:
+        return u'http://%s.s3.amazon.com/%s' % (current_app.config['S3_BUCKET'], name)
