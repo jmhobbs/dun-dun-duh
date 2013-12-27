@@ -9,8 +9,11 @@ class BaseConfig(object):
 
     REDIS_URL = 'redis://localhost:6379/0'
 
+    UPLOAD_DESTINATION = 'local'
+
     AWS_ACCESS_KEY = None
     AWS_SECRET_KEY = None
+    S3_BUCKET = None
 
     # Max POST request size
     MAX_CONTENT_LENGTH = 6 * 1024 * 1024  # 6MB
