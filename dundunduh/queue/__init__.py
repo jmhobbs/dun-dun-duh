@@ -5,7 +5,7 @@ from PIL import Image
 
 from flask import current_app, url_for
 
-from ..util.image import VariableGaussianBlur
+#from ..util.image import VariableGaussianBlur
 from ..renderers.gifsicle import make_animated_gif
 from ..crop import build_crops
 
@@ -23,9 +23,9 @@ def compose_animated_gif(filename, x, y, size, frame_count):
     frames = []
 
     for i in xrange(0, frame_count):
-        frame = im.crop(crops[i]).resize((final_size, final_size))
-        if i > 0:
-            frame = frame.filter(VariableGaussianBlur(i * 0.5))
+        frame = im.crop(crops[i]).resize((final_size, final_size), Image.ANTIALIAS)
+#        if i > 0:
+#            frame = frame.filter(VariableGaussianBlur(i * 0.25))
         frames.append(frame.convert('P'))
         times.append(35)
 
