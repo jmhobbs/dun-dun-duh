@@ -64,7 +64,6 @@ def register_views(app):
 
     @app.route('/render/<filename>', methods=('POST',))
     def compose(filename):
-        frames = request.form.get('frames', 5, type=int)
         x = request.form.get('x', type=int)
         y = request.form.get('y', type=int)
         size = request.form.get('size', type=int)
@@ -72,10 +71,13 @@ def register_views(app):
         if x is None or y is None or size is None:
             abort(400)
 
-        if frames < 3:
-            frames = 3
-        elif frames > 7:
-            frames = 7
+        # TODO: auto-choose frame count
+        frames = 5
+
+#        if frames < 3:
+#            frames = 3
+#        elif frames > 7:
+#            frames = 7
 
         center_x = x + int(size * 0.5)
         center_y = y + int(size * 0.5)
