@@ -42,7 +42,7 @@ def register_views(app):
             file = request.files['file']
             if file and is_allowed_file(file.filename):
 
-                filename = random_alphanumeric_string(15) + '_' + hashlib.new('sha1', file.filename).hexdigest() + '.jpg'
+                filename = random_alphanumeric_string(5) + hashlib.new('sha1', file.filename).hexdigest()[:5] + '.jpg'
 
                 im = Image.open(file)
                 w, h = im.size
