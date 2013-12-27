@@ -15,12 +15,35 @@ from .queue import compose_animated_gif
 
 def register_views(app):
 
+    #####################################################
+    # Util and static. Override these in nginx
+
+    @app.route('/robots.txt')
+    @app.route('/humans.txt')
+    def root_level_static_files():
+        return send_from_directory(app.static_folder, request.path[1:])
+
+    @app.route('/uploads/<filename>')
+    def uploaded_file(filename):
+        '''
+        Static path for uploaded images.
+        '''
+        return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+    #####################################################
+    # App!
+
     @app.route('/', methods=['GET', 'POST'])
-    def upload_file():
+    def index():
+        '''
+        The first step in the process, file upload, resize, and storage.
+        '''
         if request.method == 'POST':
             file = request.files['file']
             if file and is_allowed_file(file.filename):
+
                 filename = random_alphanumeric_string(15) + '_' + hashlib.new('sha1', file.filename).hexdigest() + '.jpg'
+
                 im = Image.open(file)
                 w, h = im.size
                 if w > app.config['LONGEST_SIDE'] or h > app.config['LONGEST_SIDE']:
@@ -29,34 +52,15 @@ def register_views(app):
                     else:
                         new_size = (int(float(w) / h * app.config['LONGEST_SIDE']), app.config['LONGEST_SIDE'])
                     im = im.resize(new_size)
-                size = im.size
+
                 im.save(os.path.join(app.config['UPLOAD_FOLDER'], filename), "JPEG", quality=80)
-                return redirect(url_for('crop_file', filename=filename, width=size[0], height=size[1]))
+
+                return redirect(url_for('crop_file', filename=filename))
         return render_template('index.html')
 
-    @app.route('/uploads/<filename>')
-    def uploaded_file(filename):
-        return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-
-    @app.route('/robots.txt')
-    @app.route('/humans.txt')
-    def root_level_static_files():
-        return send_from_directory(app.static_folder, request.path[1:])
-
-    @app.route('/crop/<filename>/<int:width>/<int:height>')
-    def crop_file(filename, width, height):
-
-        if width < height:
-            size = max(10, int(width * .5))
-            max_size = max(10, int(width * .75))
-        else:
-            size = max(10, int(height * .5))
-            max_size = max(10, int(height * .75))
-
-        x = int(float(width - size) / 2)
-        y = int(float(height - size) / 2)
-
-        return render_template('crop.html', filename=filename, size=size, max_size=max_size, x=x, y=y)
+    @app.route('/crop/<filename>')
+    def crop_file(filename):
+        return render_template('crop.html', filename=filename)
 
     @app.route('/render/<filename>', methods=('POST',))
     def compose(filename):

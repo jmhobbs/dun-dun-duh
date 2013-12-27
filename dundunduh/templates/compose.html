@@ -43,7 +43,7 @@
 		function fail (message) {
 			$('#progress').slideUp();
 			$('#error').slideDown();
-			$('#status').stop().show().text(message).append($('<p/>').append($('<a/>').attr('href', '{{ url_for("upload_file") }}').text('Try Again?')));
+			$('#status').stop().show().text(message).append($('<p/>').append($('<a/>').attr('href', '{{ url_for("index") }}').text('Try Again?')));
 		}
 
 		function checkJob () {

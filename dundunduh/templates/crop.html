@@ -8,24 +8,17 @@
 <h1>Select Focus Area</h1>
 <div style="text-align: center;">
 	<p class="help-block">This is the final frame of your GIF, what we zoom in to.</p>
-	<img src="{{ url_for("uploaded_file", filename=filename) }}" alt="Loading..." id="base-image" />
-	<p><a href="#" id="show-options">(More Options)</a></p>
-	<form method="POST" action="{{ url_for("compose", filename=filename) }}">
-		<div class="col-md-4 col-md-offset-4" id="options" style="display: none;">
-			<div class="form-group">
-				<label for="frames">How many frames?</label>
-				<select name="frames" class="form-control">
-					<option>3</option>
-					<option>4</option>
-					<option selected="selected">5</option>
-					<option>6</option>
-					<option>7</option>
-				</select>
-			</div><!-- form-group -->
+	<div class="row">
+		<div id="error" class="alert alert-danger" style="display: none;">
+			<strong>Well Crap.</strong>
+			Your photo didn't load. Sorry. <a href="{{ url_for("index") }}">Try again?</a>
 		</div>
-		<input type="hidden" name="x" value="{{ x }}" />
-		<input type="hidden" name="y" value="{{ y }}" />
-		<input type="hidden" name="size" value="{{ size }}" />
+	</div>
+	<img src="#loading" alt="Loading..." id="base-image" />
+	<form method="POST" action="{{ url_for("compose", filename=filename) }}">
+		<input type="hidden" name="x" value="" />
+		<input type="hidden" name="y" value="" />
+		<input type="hidden" name="size" value="" />
 		<button type="submit" class="btn btn-primary" disabled="disabled">Create My GIF &raquo;</button>
 	</form>
 </div>
@@ -36,23 +29,42 @@
 	<script>
 		$(function () {
 
-			$('#show-options').on('click', function () {
-				$(this).slideUp(function () { $('#options').slideDown(); });
-			});
+			$('#base-image')
+				.on('load', function () {
 
-			$('#base-image').Jcrop({
-				aspectRatio: 1,
-				minSize: [10, 10],
-				maxSize: [{{ max_size }}, {{ max_size }}],
-				allowSelect: false,
-				setSelect: [{{ x }}, {{ y }}, {{ x + size }}, {{ y + size }}],
-				onSelect: function (c) {
-					$('input[name=x]').val(c.x);
-					$('input[name=y]').val(c.y);
-					$('input[name=size]').val(c.w);
-					$('button').attr('disabled', false);
-				}
-			});
+					var $img = $(this),
+					    width = $img.width(),
+							height = $img.height(),
+					    size, max_size, x, y;
+
+					if( width < height ) {
+						size = Math.max(10, Math.floor(width * 0.5));
+						max_size = Math.max(10, Math.floor(width * 0.75));
+					}
+					else {
+						size = Math.max(10, Math.floor(height * 0.5));
+						max_size = Math.max(10, Math.floor(height * 0.75));
+					}
+
+					x = Math.floor((width - size) / 2);
+					y = Math.floor((height - size) / 2);
+
+					$(this).Jcrop({
+						aspectRatio: 1,
+						minSize: [10, 10],
+						maxSize: [max_size, max_size],
+						allowSelect: false,
+						setSelect: [x, y, x + size, y + size],
+						onSelect: function (c) {
+							$('input[name=x]').val(c.x);
+							$('input[name=y]').val(c.y);
+							$('input[name=size]').val(c.w);
+							$('button').attr('disabled', false);
+						}
+					});
+				})
+				.on('error', function () { $(this).hide(); $('#error').show(); })
+				.attr("src", "{{ url_for("uploaded_file", filename=filename) }}");
 		});
 	</script>
 {% endblock %}
