@@ -10,3 +10,11 @@
 		<p><a class="btn btn-primary" href="{{ url_for("index") }}">Make A New GIF</a></p>
 	</div>
 {% endblock %}
+
+{% block script %}
+<script>
+	$(function () {
+		$("input").on("click", function () { this.select(); });
+	});
+</script>
+{% endblock %}
