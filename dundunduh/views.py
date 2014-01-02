@@ -3,7 +3,7 @@
 import os
 import hashlib
 
-from flask import request, redirect, url_for, render_template, send_from_directory, abort, jsonify
+from flask import request, url_for, render_template, send_from_directory, abort, jsonify, session
 import flask.ext.rq
 import rq.job
 
@@ -27,22 +27,37 @@ def register_views(app):
     def uploaded_file(filename):
         '''
         Static path for uploaded images.
+
+        Should be overriden in production by an http server level rule.
         '''
         return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
     #####################################################
     # App!
-
-    @app.route('/', methods=['GET', 'POST'])
+    @app.route('/')
     def index():
-        '''
-        The first step in the process, file upload, resize, and storage.
-        '''
-        if request.method == 'POST':
-            file = request.files['file']
-            if file and is_allowed_file(file.filename):
+        upload_token = random_alphanumeric_string(10)
+        session['upload_token'] = upload_token
+        return render_template('index.html', upload_token=upload_token)
 
-                filename = random_alphanumeric_string(5) + hashlib.new('sha1', file.filename).hexdigest()[:5] + '.jpg'
+    @app.route('/upload', methods=('POST', 'HEAD'))
+    def upload():
+        '''
+        Upload method for jQuery-upload XHR.  Uses session token to discourage spamming.
+        '''
+        response = {"error": False, "files": []}
+
+        if request.method == 'POST':
+            file = request.files.get('file')
+            if request.form.get('upload_token') != session.get('upload_token', 'nopenopenope'):
+                response["error"] = "Invalid upload token."
+            elif not file:
+                response["error"] = "No file uploaded."
+            elif not is_allowed_file(file.filename):
+                response["error"] = "Invalid file type."
+            else:
+                slug = random_alphanumeric_string(5) + hashlib.new('sha1', file.filename).hexdigest()[:5]
+                filename = slug + '.jpg'
 
                 im = Image.open(file)
                 w, h = im.size
@@ -55,15 +70,27 @@ def register_views(app):
 
                 im.save(os.path.join(app.config['UPLOAD_FOLDER'], filename), "JPEG", quality=80)
 
-                return redirect(url_for('crop_file', filename=filename))
-        return render_template('index.html')
+                response['files'] = [{"name": file.filename, "id": slug, "redirect": url_for("crop_file", slug=slug, _external=True)}]
 
-    @app.route('/crop/<filename>')
-    def crop_file(filename):
-        return render_template('crop.html', filename=filename)
+        response = jsonify(response)
 
-    @app.route('/render/<filename>', methods=('POST',))
-    def compose(filename):
+        response.headers['Vary'] = 'Accept'
+
+        # IE chokes on application/json in iframe uploads
+        if 'HTTP_ACCEPT' in request.headers:
+            if "application/json" in request.headers['HTTP_ACCEPT']:
+                response.headers['Content-Type'] = 'application/json'
+            else:
+                response.headers['Content-Type'] = 'text/plain'
+
+        return response
+
+    @app.route('/crop/<slug>')
+    def crop_file(slug):
+        return render_template('crop.html', slug=slug, filename=slug + ".jpg")
+
+    @app.route('/render/<slug>', methods=('POST',))
+    def compose(slug):
         x = request.form.get('x', type=int)
         y = request.form.get('y', type=int)
         size = request.form.get('size', type=int)
@@ -82,16 +109,16 @@ def register_views(app):
         center_x = x + int(size * 0.5)
         center_y = y + int(size * 0.5)
 
-        job = flask.ext.rq.get_queue('default').enqueue(compose_animated_gif, filename, center_x, center_y, size, frames)
+        job = flask.ext.rq.get_queue('default').enqueue(compose_animated_gif, slug + ".jpg", center_x, center_y, size, frames)
 
         return render_template('compose.html', job_id=job.id)
 
-    @app.route('/gif/<filename>')
-    def view(filename):
+    @app.route('/gif/<slug>')
+    def view(slug):
         if app.config.get('UPLOAD_URL_FORMAT_STRING'):
-            image_url = app.config.get('UPLOAD_URL_FORMAT_STRING') % {"filename": filename, "extension": ".gif"}
+            image_url = app.config.get('UPLOAD_URL_FORMAT_STRING') % {"filename": slug, "extension": ".gif"}
         else:
-            image_url = url_for('uploaded_file', filename=filename + ".gif", _external=True)
+            image_url = url_for('uploaded_file', filename=slug + ".gif", _external=True)
         return render_template('view.html', image_url=image_url)
 
     @app.route('/job/status.json')
@@ -101,4 +128,13 @@ def register_views(app):
 
         job = rq.job.Job(request.args.get('id'), flask.ext.rq.get_connection())
 
-        return jsonify({"error": False, "data": {"id": job.id, "status": job.status, "finished": job.is_finished, "failed": job.is_failed, "return_value": job.return_value}})
+        return jsonify({
+            "error": False,
+            "data": {
+                "id": job.id,
+                "status": job.status,
+                "finished": job.is_finished,
+                "failed": job.is_failed,
+                "return_value": job.return_value
+            }
+        })

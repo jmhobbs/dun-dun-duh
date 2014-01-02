@@ -10,3 +10,29 @@ a, a:link, a:hover, a:visited {
 .compose-row {
 	margin-top: 25%;
 }
+
+.alert a.btn {
+	text-decoration: none;
+}
+
+.fileinput-button {
+	position: relative;
+	overflow: hidden;
+}
+
+.fileinput-button input {
+	display: block;
+	position: absolute;
+	top: 0;
+	right: 0;
+	margin: 0;
+	opacity: 0;
+	-ms-filter: 'alpha(opacity=0)';
+	font-size: 200px;
+	direction: ltr;
+	cursor: pointer;
+}
+
+p.help-block.error {
+	color: #F00;
+}

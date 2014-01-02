@@ -3,8 +3,9 @@
 {% block body %}
 	<div class="row compose-row">
 		<div id="error" class="alert alert-danger" style="display: none;">
-			<strong>Well Crap.</strong>
-			Something went wrong and your GIF was lost forever into the dark abyss.  Sorry.  Please don't be mad.<br/>
+			<a href="{{ url_for("index") }}" class="pull-right btn btn-default btn-xs">Try again</a>
+			<div class="pull-left"><strong>Well crap. It broke.</strong></div><br/>
+			<span id="error-details">Something went wrong and your GIF was lost forever into the dark abyss.  Sorry.  Please don't be mad.</span><br/>
 		</div>
 		<div id="progress" class="progress progress-striped active">
     	<div class="progress-bar" style="width: 100%"></div>
@@ -43,7 +44,7 @@
 		function fail (message) {
 			$('#progress').slideUp();
 			$('#error').slideDown();
-			$('#status').stop().show().text(message).append($('<p/>').append($('<a/>').attr('href', '{{ url_for("index") }}').text('Try Again?')));
+			$('#status').stop().show().text(message);
 		}
 
 		function checkJob () {
@@ -66,7 +67,7 @@
 					else {
 						if( ++loop_count > 5 ) {
 							console.log(loop_count);
-							fail("Too many people using the service!");
+							fail("Job timed out. We might be overloaded right now.");
 							// TODO: Cancel job?
 						}
 						else {

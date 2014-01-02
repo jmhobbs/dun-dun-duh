@@ -15,7 +15,7 @@
 		</div>
 	</div>
 	<img src="#loading" alt="Loading..." id="base-image" />
-	<form method="POST" action="{{ url_for("compose", filename=filename) }}">
+	<form method="POST" action="{{ url_for("compose", slug=slug) }}">
 		<input type="hidden" name="x" value="" />
 		<input type="hidden" name="y" value="" />
 		<input type="hidden" name="size" value="" />

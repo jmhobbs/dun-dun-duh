@@ -2,12 +2,79 @@
 
 {% block body %}
 <h1>DUN, DUN, DUH!</h1>
-<form action="" method="POST" enctype="multipart/form-data" role="form">
-	<div class="form-group">
-		<label for="file">Select your photo!</label>
+
+<div id="upload">
+	<span class="btn btn-primary fileinput-button">
+		<span>Select Image</span>
 		<input type="file" name="file" id="file" />
-		<p class="help-block">JPG/GIF/PNG - 6MB Tops</p>
+	</span>
+	<p id="upload-help" class="help-block">JPG/GIF/PNG - Max 6MB</p>
+</div>
+
+<div class="row" id="progress-row" style="display: none;">
+	<div id="error" class="alert alert-danger" style="display: none;">
+		<a href="{{ url_for("index") }}" class="pull-right btn btn-default btn-xs">Try again</a>
+		<div class="pull-left"><strong>Well crap. It broke.</strong></div><br/>
+		<span id="error-details">Something went wrong and your image was lost forever into the dark abyss.  Sorry.  Please don't be mad.</span><br/>
 	</div>
-	<button type="submit" class="btn">Next &raquo;</button>
-</form>
+	<div id="progress" class="progress progress-striped active">
+		<div class="progress-bar" style="width: 100%"></div>
+	</div>
+	<p id="status" class="help-block" style="text-align: center;">Uploading</p>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script src="{{ url_for("static", filename="vendor/jQuery-File-Upload-9.5.2/js/vendor/jquery.ui.widget.js") }}"></script>
+<script src="{{ url_for("static", filename="vendor/jQuery-File-Upload-9.5.2/js/jquery.iframe-transport.js") }}"></script>
+<script src="{{ url_for("static", filename="vendor/jQuery-File-Upload-9.5.2/js/jquery.fileupload.js") }}"></script>
+<script>
+jQuery(function ($) {
+	var upload = $('#file').fileupload({
+		url: "{{ url_for("upload") }}",
+		dataType: 'json',
+		formData: {"upload_token": "{{ upload_token }}"},
+		singleFileUploads: true,
+		maxNumberOfFiles: 1,
+		acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+		change: function (e, data) {
+			var file = data.files[0];
+			$('#upload-help').removeClass('error').text('');
+			if (!(/\.(gif|jpe?g|png)$/i).test(file.name)) {
+				$('#upload-help').addClass('error').text("Please select an image file. (jpg, gif, png)");
+				return false;
+			}
+			else if (file.size > 6291456) {
+				$('#upload-help').addClass('error').text("Please choose a smaller image. The largest acceptable size is 6MB.");
+				return false;
+			}
+		},
+		submit: function (e, data) {
+			$("#upload").hide();
+			$("#progress-row").show();
+		},
+		done: function (e, data) {
+			if( data.result.error === false ) {
+				$("#status").text("Please Wait");
+				window.location.href = data.result.files[0].redirect;
+			}
+			else {
+				$('#progress, #status').slideUp('fast');
+				$('#error-details').text(data.result.error);
+				$('#error').slideDown('fast');
+			}
+		},
+		fail: function (e, data) {
+			$('#progress, #status').slideUp('fast');
+			$('#error').slideDown('fast');
+		},
+		progressall: function (e, data) {
+			var progress = parseInt(data.loaded / data.total * 100, 10);
+			$('#progress .progress-bar').css('width', progress + '%');
+			$("#status").text(progress + "%");
+		}
+	});
+});
+</script>
 {% endblock %}

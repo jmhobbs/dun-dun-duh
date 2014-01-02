@@ -17,7 +17,7 @@ class BaseConfig(object):
     UPLOAD_URL_FORMAT_STRING = None
 
     # Max POST request size
-    MAX_CONTENT_LENGTH = 6 * 1024 * 1024  # 6MB
+    MAX_CONTENT_LENGTH = int(6.25 * 1024 * 1024)  # 6MB uploads + breathing room
 
     # Size in pixels to crop images
     LONGEST_SIDE = 400
