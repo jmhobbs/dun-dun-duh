@@ -21,6 +21,8 @@
 	</tbody>
 </table>
 
+<h3>Processing Times</h3>
+
 <div style="background: #FFF; padding: 10px 20px; width: 900px; border: 1px solid #444; border-radius: 5px;">
 	<h4 style="color: #444; text-shadow: none;">Average Rendering Times, Last Hour</h4>
 	<div style="float: right; margin: 0 10px; color: #444;">
@@ -57,6 +59,37 @@
 	<div style="clear: both;"></div>
 </div>
 
+<h3>Processing Totals</h3>
+
+<div style="background: #FFF; padding: 10px 20px; width: 900px; border: 1px solid #444; border-radius: 5px;">
+	<h4 style="color: #444; text-shadow: none;">Total Processed, Last Hour</h4>
+	<div style="float: right; margin: 0 10px; color: #444;">
+		<div style="background: #00F; width: 10px; height: 10px; display: inline-block;"></div> Completed<br/>
+		<div style="background: #F00; width: 10px; height: 10px; display: inline-block;"></div> Failed<br/>
+	</div>
+	<canvas id="processed_hour" width="700" height="400"></canvas>
+	<div style="clear: both;"></div>
+</div>
+
+<div style="background: #FFF; padding: 10px 20px; width: 900px; border: 1px solid #444; border-radius: 5px;">
+	<h4 style="color: #444; text-shadow: none;">Total Processed, Last 24 Hours</h4>
+	<div style="float: right; margin: 0 10px; color: #444;">
+		<div style="background: #00F; width: 10px; height: 10px; display: inline-block;"></div> Completed<br/>
+		<div style="background: #F00; width: 10px; height: 10px; display: inline-block;"></div> Failed<br/>
+	</div>
+	<canvas id="processed_day" width="700" height="400"></canvas>
+	<div style="clear: both;"></div>
+</div>
+
+<div style="background: #FFF; padding: 10px 20px; width: 900px; border: 1px solid #444; border-radius: 5px;">
+	<h4 style="color: #444; text-shadow: none;">Total Processed, This Week</h4>
+	<div style="float: right; margin: 0 10px; color: #444;">
+		<div style="background: #00F; width: 10px; height: 10px; display: inline-block;"></div> Completed<br/>
+		<div style="background: #F00; width: 10px; height: 10px; display: inline-block;"></div> Failed<br/>
+	</div>
+	<canvas id="processed_week" width="700" height="400"></canvas>
+	<div style="clear: both;"></div>
+</div>
 
 {% endblock %}
 
@@ -68,6 +101,9 @@
 		new Chart(document.getElementById("total_time_one_hour").getContext("2d")).Line({{total_time_hour|safe}}, defaults);
 		new Chart(document.getElementById("total_time_one_day").getContext("2d")).Line({{total_time_one_day|safe}}, defaults);
 		new Chart(document.getElementById("total_time_week").getContext("2d")).Line({{total_time_week|safe}}, defaults);
+		new Chart(document.getElementById("processed_hour").getContext("2d")).Line({{processed_hour|safe}}, defaults);
+		new Chart(document.getElementById("processed_day").getContext("2d")).Line({{processed_day|safe}}, defaults);
+		new Chart(document.getElementById("processed_week").getContext("2d")).Line({{processed_week|safe}}, defaults);
 	}());
 </script>
 {% endblock %}

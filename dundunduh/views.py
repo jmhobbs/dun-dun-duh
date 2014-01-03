@@ -139,6 +139,11 @@ def register_views(app):
 
     @app.route('/stats')
     def stats():
+        tz = timezone(app.config.get('TIMEZONE', 'UTC'))
+
+        dt = datetime.fromtimestamp(time.time())
+        dt = tz.localize(dt)
+
         averages_week = {
             "labels": [],
             "datasets": [
@@ -148,6 +153,14 @@ def register_views(app):
                 {"strokeColor": "rgba(0,255,0,1)", "data": []}
             ]
         }
+
+        for i in xrange(7):
+            ndt = dt - timedelta(days=6 - i)
+            averages_week['labels'].append(ndt.strftime('%a'))
+            averages_week['datasets'][0]['data'].append(records.get_daily_average(ndt, 'total'))
+            averages_week['datasets'][1]['data'].append(records.get_daily_average(ndt, 'wait'))
+            averages_week['datasets'][2]['data'].append(records.get_daily_average(ndt, 'render'))
+            averages_week['datasets'][3]['data'].append(records.get_daily_average(ndt, 'store'))
 
         averages_day = {
             "labels": [],
@@ -159,6 +172,14 @@ def register_views(app):
             ]
         }
 
+        for i in xrange(24):
+            ndt = dt - timedelta(hours=23 - i)
+            averages_day["labels"].append(ndt.strftime("%H:00"))
+            averages_day['datasets'][0]['data'].append(records.get_hourly_average(ndt, 'total'))
+            averages_day['datasets'][1]['data'].append(records.get_hourly_average(ndt, 'wait'))
+            averages_day['datasets'][2]['data'].append(records.get_hourly_average(ndt, 'render'))
+            averages_day['datasets'][3]['data'].append(records.get_hourly_average(ndt, 'store'))
+
         averages_hour = {
             "labels": [],
             "datasets": [
@@ -169,27 +190,6 @@ def register_views(app):
             ]
         }
 
-        tz = timezone(app.config.get('TIMEZONE', 'UTC'))
-
-        dt = datetime.fromtimestamp(time.time())
-        dt = tz.localize(dt)
-
-        for i in xrange(7):
-            ndt = dt - timedelta(days=6 - i)
-            averages_week['labels'].append(ndt.strftime('%a'))
-            averages_week['datasets'][0]['data'].append(records.get_daily_average(ndt, 'total'))
-            averages_week['datasets'][1]['data'].append(records.get_daily_average(ndt, 'wait'))
-            averages_week['datasets'][2]['data'].append(records.get_daily_average(ndt, 'render'))
-            averages_week['datasets'][3]['data'].append(records.get_daily_average(ndt, 'store'))
-
-        for i in xrange(24):
-            ndt = dt - timedelta(hours=23 - i)
-            averages_day["labels"].append(ndt.strftime("%H:00"))
-            averages_day['datasets'][0]['data'].append(records.get_hourly_average(ndt, 'total'))
-            averages_day['datasets'][1]['data'].append(records.get_hourly_average(ndt, 'wait'))
-            averages_day['datasets'][2]['data'].append(records.get_hourly_average(ndt, 'render'))
-            averages_day['datasets'][3]['data'].append(records.get_hourly_average(ndt, 'store'))
-
         for i in xrange(20):
             segment = (dt.minute / 5) * 5
             ndt = dt - timedelta(minutes=(dt.minute - segment) + ((19 - i) * 5))
@@ -199,6 +199,49 @@ def register_views(app):
             averages_hour['datasets'][2]['data'].append(records.get_five_minute_segment_average(ndt, 'render'))
             averages_hour['datasets'][3]['data'].append(records.get_five_minute_segment_average(ndt, 'store'))
 
+        processed_week = {
+            "labels": [],
+            "datasets": [
+                {"strokeColor": "rgba(0,0,255,1)", "data": []},
+                {"strokeColor": "rgba(255,0,0,1)", "data": []},
+            ]
+        }
+
+        for i in xrange(7):
+            ndt = dt - timedelta(days=6 - i)
+            processed_week['labels'].append(ndt.strftime('%a'))
+            processed_week['datasets'][0]['data'].append(records.get_daily_created(ndt))
+            processed_week['datasets'][1]['data'].append(records.get_daily_failed(ndt))
+
+        processed_day = {
+            "labels": [],
+            "datasets": [
+                {"strokeColor": "rgba(0,0,255,1)", "data": []},
+                {"strokeColor": "rgba(255,0,0,1)", "data": []},
+            ]
+        }
+
+        for i in xrange(24):
+            ndt = dt - timedelta(hours=23 - i)
+            processed_day['labels'].append(ndt.strftime('%H:00'))
+            processed_day['datasets'][0]['data'].append(records.get_hourly_created(ndt))
+            processed_day['datasets'][1]['data'].append(records.get_hourly_failed(ndt))
+
+        processed_hour = {
+            "labels": [],
+            "datasets": [
+                {"strokeColor": "rgba(0,0,255,1)", "data": []},
+                {"strokeColor": "rgba(255,0,0,1)", "data": []},
+            ]
+        }
+
+        for i in xrange(20):
+            segment = (dt.minute / 5) * 5
+            ndt = dt - timedelta(minutes=(dt.minute - segment) + ((19 - i) * 5))
+            processed_hour['labels'].append(ndt.strftime('%H:%M'))
+            processed_hour['datasets'][0]['data'].append(records.get_five_minute_segment_created(ndt))
+            processed_hour['datasets'][1]['data'].append(records.get_five_minute_segment_failed(ndt))
+
         return render_template(
             "stats.html",
             all_time_created=records.get_all_time_created(),
@@ -206,7 +249,10 @@ def register_views(app):
             all_time_average=records.get_all_time_average('total'),
             total_time_week=json.dumps(averages_week),
             total_time_one_day=json.dumps(averages_day),
-            total_time_hour=json.dumps(averages_hour)
+            total_time_hour=json.dumps(averages_hour),
+            processed_week=json.dumps(processed_week),
+            processed_day=json.dumps(processed_day),
+            processed_hour=json.dumps(processed_hour)
         )
 
     @app.route('/job/status.json')
