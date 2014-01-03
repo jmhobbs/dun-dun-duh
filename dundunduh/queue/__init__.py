@@ -14,11 +14,18 @@ from flask import current_app, url_for
 
 from ..renderers.gifsicle import make_animated_gif
 from ..crop import build_crops
-from ..records import create_gif
+from ..records import create_gif, create_gif_failed
 
 
 def compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip="0.0.0.0"):
+    try:
+        _do_compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip)
+    except Exception as e:
+        create_gif_failed(queue_time)
+        raise e
 
+
+def _do_compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip="0.0.0.0"):
     filename = slug + ".gif"
 
     start_rendering = time.time()

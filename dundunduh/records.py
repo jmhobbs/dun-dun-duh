@@ -68,3 +68,17 @@ def create_gif(slug, ip, queue_time, start_rendering, wait_duration, render_dura
     rolling_average_script(keys=['stats:created', 'stats:average:store:%d-%02d-%02d %02d' % (dt.year, dt.month, dt.day, dt.hour)], args=[store_duration], client=pipe)
 
     pipe.execute()
+
+
+def create_gif_failed(queue_time):
+    tz = timezone(current_app.config.get('TIMEZONE', 'UTC'))
+
+    dt = datetime.fromtimestamp(queue_time)
+    dt = tz.localize(dt)
+
+    pipe = redis.pipeline()
+    pipe.incr('stats:failed')
+    pipe.incr('stats:failed:%d-%02d-%02d' % (dt.year, dt.month, dt.day))
+    pipe.incr('stats:failed:%d-%02d-%02d %02d' % (dt.year, dt.month, dt.day, dt.hour))
+    pipe.incr('stats:failed:%d-%02d-%02d %02d:%02d' % (dt.year, dt.month, dt.day, dt.hour, (dt.minute / 5) * 5))
+    pipe.execute()
