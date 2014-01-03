@@ -89,6 +89,13 @@ def create_gif_failed(queue_time):
     pipe.execute()
 
 
+def get_all_time_average(type):
+    avg = redis.get('stats:average:%s' % (type,))
+    if not avg:
+        return 0
+    return float(avg)
+
+
 def get_daily_average(dt, type):
     avg = redis.get('stats:average:%s:%d-%02d-%02d' % (type, dt.year, dt.month, dt.day))
     if not avg:
@@ -101,3 +108,66 @@ def get_hourly_average(dt, type):
     if not avg:
         return 0
     return float(avg)
+
+
+def get_five_minute_segment_average(dt, type):
+    avg = redis.get('stats:average:%s:%d-%02d-%02d %02d:%02d' % (type, dt.year, dt.month, dt.day, dt.hour, (dt.minute / 5) * 5))
+    if not avg:
+        return 0
+    return float(avg)
+
+
+def get_all_time_created():
+    count = redis.get('stats:created')
+    if not count:
+        return 0
+    return int(count)
+
+
+def get_daily_created(dt):
+    count = redis.get('stats:created:%d-%02d-%02d' % (dt.year, dt.month, dt.day))
+    if not count:
+        return 0
+    return int(count)
+
+
+def get_hourly_created(dt):
+    count = redis.get('stats:created:%d-%02d-%02d %02d' % (dt.year, dt.month, dt.day, dt.hour))
+    if not count:
+        return 0
+    return int(count)
+
+
+def get_five_minute_segment_created(dt):
+    count = redis.get('stats:created:%d-%02d-%02d %02d:%02d' % (dt.year, dt.month, dt.day, dt.hour, (dt.minute / 5) * 5))
+    if not count:
+        return 0
+    return int(count)
+
+
+def get_all_time_failed():
+    count = redis.get('stats:failed')
+    if not count:
+        return 0
+    return int(count)
+
+
+def get_daily_failed(dt):
+    count = redis.get('stats:failed:%d-%02d-%02d' % (dt.year, dt.month, dt.day))
+    if not count:
+        return 0
+    return int(count)
+
+
+def get_hourly_failed(dt):
+    count = redis.get('stats:failed:%d-%02d-%02d %02d' % (dt.year, dt.month, dt.day, dt.hour))
+    if not count:
+        return 0
+    return int(count)
+
+
+def get_five_minute_segment_failed(dt):
+    count = redis.get('stats:failed:%d-%02d-%02d %02d:%02d' % (dt.year, dt.month, dt.day, dt.hour, (dt.minute / 5) * 5))
+    if not count:
+        return 0
+    return int(count)

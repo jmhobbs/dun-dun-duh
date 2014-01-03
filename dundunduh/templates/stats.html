@@ -2,16 +2,34 @@
 
 {% block body %}
 <h1>DUN, DUN, DUH!</h1>
+<h2 style="text-align: center;">Dramatic Stats</h2>
+
+<table style="margin: 30px 0;">
+	<tbody>
+		<tr>
+			<th style="padding-right: 40px;">Total Created</th>
+			<td style="text-align: right;">{{ all_time_created }}</td>
+		</tr>
+		<tr>
+			<th style="padding-right: 40px;">Total Failures</th>
+			<td style="text-align: right;">{{ all_time_failed }}</td>
+		</tr>
+		<tr>
+			<th style="padding-right: 40px;">Average Creation Time</th>
+			<td style="text-align: right;">{{ "%.3f" % all_time_average }} seconds</td>
+		</tr>
+	</tbody>
+</table>
 
 <div style="background: #FFF; padding: 10px 20px; width: 900px; border: 1px solid #444; border-radius: 5px;">
-	<h4 style="color: #444; text-shadow: none;">Average Rendering Times, This Week</h4>
+	<h4 style="color: #444; text-shadow: none;">Average Rendering Times, Last Hour</h4>
 	<div style="float: right; margin: 0 10px; color: #444;">
 		<div style="background: #000; width: 10px; height: 10px; display: inline-block;"></div> Total<br/>
 		<div style="background: #F00; width: 10px; height: 10px; display: inline-block;"></div> Queue Wait<br/>
 		<div style="background: #00F; width: 10px; height: 10px; display: inline-block;"></div> Rendering<br/>
 		<div style="background: #0F0; width: 10px; height: 10px; display: inline-block;"></div> Storing<br/>
 	</div>
-	<canvas id="total_time_week" width="700" height="400"></canvas>
+	<canvas id="total_time_one_hour" width="700" height="400"></canvas>
 	<div style="clear: both;"></div>
 </div>
 
@@ -27,14 +45,29 @@
 	<div style="clear: both;"></div>
 </div>
 
+<div style="background: #FFF; padding: 10px 20px; width: 900px; border: 1px solid #444; border-radius: 5px;">
+	<h4 style="color: #444; text-shadow: none;">Average Rendering Times, This Week</h4>
+	<div style="float: right; margin: 0 10px; color: #444;">
+		<div style="background: #000; width: 10px; height: 10px; display: inline-block;"></div> Total<br/>
+		<div style="background: #F00; width: 10px; height: 10px; display: inline-block;"></div> Queue Wait<br/>
+		<div style="background: #00F; width: 10px; height: 10px; display: inline-block;"></div> Rendering<br/>
+		<div style="background: #0F0; width: 10px; height: 10px; display: inline-block;"></div> Storing<br/>
+	</div>
+	<canvas id="total_time_week" width="700" height="400"></canvas>
+	<div style="clear: both;"></div>
+</div>
+
+
 {% endblock %}
 
 {% block script %}
 <script src="{{ url_for("static", filename="vendor/Chart.min.js") }}"></script>
 <script>
 	(function () {
-		new Chart(document.getElementById("total_time_week").getContext("2d")).Line({{total_time_week|safe}}, {animation: false, datasetFill: false, scaleFontColor: "#444", pointDot: false});
-		new Chart(document.getElementById("total_time_one_day").getContext("2d")).Line({{total_time_one_day|safe}}, {animation: false, datasetFill: false, scaleFontColor: "#444", pointDot: false});
+		var defaults = {animation: false, datasetFill: false, scaleFontColor: "#444", pointDot: false};
+		new Chart(document.getElementById("total_time_one_hour").getContext("2d")).Line({{total_time_hour|safe}}, defaults);
+		new Chart(document.getElementById("total_time_one_day").getContext("2d")).Line({{total_time_one_day|safe}}, defaults);
+		new Chart(document.getElementById("total_time_week").getContext("2d")).Line({{total_time_week|safe}}, defaults);
 	}());
 </script>
 {% endblock %}

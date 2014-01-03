@@ -17,7 +17,7 @@ from PIL import Image
 from .util import is_allowed_file, random_alphanumeric_string
 from .util.ip import extract_remote_ip_from_headers
 from .queue import compose_animated_gif
-from .records import get_daily_average, get_hourly_average
+from . import records
 
 
 def register_views(app):
@@ -159,28 +159,55 @@ def register_views(app):
             ]
         }
 
+        averages_hour = {
+            "labels": [],
+            "datasets": [
+                {"strokeColor": "rgba(0,0,0,1)", "data": []},
+                {"strokeColor": "rgba(255,0,0,1)", "data": []},
+                {"strokeColor": "rgba(0,0,255,1)", "data": []},
+                {"strokeColor": "rgba(0,255,0,1)", "data": []}
+            ]
+        }
+
         tz = timezone(app.config.get('TIMEZONE', 'UTC'))
 
         dt = datetime.fromtimestamp(time.time())
         dt = tz.localize(dt)
 
         for i in xrange(7):
-            ndt = dt - timedelta(6 - i)
+            ndt = dt - timedelta(days=6 - i)
             averages_week['labels'].append(ndt.strftime('%a'))
-            averages_week['datasets'][0]['data'].append(get_daily_average(ndt, 'total'))
-            averages_week['datasets'][1]['data'].append(get_daily_average(ndt, 'wait'))
-            averages_week['datasets'][2]['data'].append(get_daily_average(ndt, 'render'))
-            averages_week['datasets'][3]['data'].append(get_daily_average(ndt, 'store'))
+            averages_week['datasets'][0]['data'].append(records.get_daily_average(ndt, 'total'))
+            averages_week['datasets'][1]['data'].append(records.get_daily_average(ndt, 'wait'))
+            averages_week['datasets'][2]['data'].append(records.get_daily_average(ndt, 'render'))
+            averages_week['datasets'][3]['data'].append(records.get_daily_average(ndt, 'store'))
 
         for i in xrange(24):
-            ndt = dt - timedelta(0, 0, 0, 0, 0, 23 - i)
+            ndt = dt - timedelta(hours=23 - i)
             averages_day["labels"].append(ndt.strftime("%H:00"))
-            averages_day['datasets'][0]['data'].append(get_hourly_average(ndt, 'total'))
-            averages_day['datasets'][1]['data'].append(get_hourly_average(ndt, 'wait'))
-            averages_day['datasets'][2]['data'].append(get_hourly_average(ndt, 'render'))
-            averages_day['datasets'][3]['data'].append(get_hourly_average(ndt, 'store'))
+            averages_day['datasets'][0]['data'].append(records.get_hourly_average(ndt, 'total'))
+            averages_day['datasets'][1]['data'].append(records.get_hourly_average(ndt, 'wait'))
+            averages_day['datasets'][2]['data'].append(records.get_hourly_average(ndt, 'render'))
+            averages_day['datasets'][3]['data'].append(records.get_hourly_average(ndt, 'store'))
 
-        return render_template("stats.html", total_time_week=json.dumps(averages_week), total_time_one_day=json.dumps(averages_day))
+        for i in xrange(20):
+            segment = (dt.minute / 5) * 5
+            ndt = dt - timedelta(minutes=(dt.minute - segment) + ((19 - i) * 5))
+            averages_hour["labels"].append(ndt.strftime("%H:%M"))
+            averages_hour['datasets'][0]['data'].append(records.get_five_minute_segment_average(ndt, 'total'))
+            averages_hour['datasets'][1]['data'].append(records.get_five_minute_segment_average(ndt, 'wait'))
+            averages_hour['datasets'][2]['data'].append(records.get_five_minute_segment_average(ndt, 'render'))
+            averages_hour['datasets'][3]['data'].append(records.get_five_minute_segment_average(ndt, 'store'))
+
+        return render_template(
+            "stats.html",
+            all_time_created=records.get_all_time_created(),
+            all_time_failed=records.get_all_time_failed(),
+            all_time_average=records.get_all_time_average('total'),
+            total_time_week=json.dumps(averages_week),
+            total_time_one_day=json.dumps(averages_day),
+            total_time_hour=json.dumps(averages_hour)
+        )
 
     @app.route('/job/status.json')
     def rq_job_status():
