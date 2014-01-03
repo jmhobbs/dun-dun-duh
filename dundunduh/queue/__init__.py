@@ -19,7 +19,7 @@ from ..records import create_gif, create_gif_failed
 
 def compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip="0.0.0.0"):
     try:
-        _do_compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip)
+        return _do_compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip)
     except Exception as e:
         create_gif_failed(queue_time)
         raise e
