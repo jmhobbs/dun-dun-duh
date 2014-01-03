@@ -31,7 +31,7 @@
 		<div style="background: #00F; width: 10px; height: 10px; display: inline-block;"></div> Rendering<br/>
 		<div style="background: #0F0; width: 10px; height: 10px; display: inline-block;"></div> Storing<br/>
 	</div>
-	<canvas id="total_time_one_hour" width="700" height="400"></canvas>
+	<canvas id="averages_hour" width="700" height="400"></canvas>
 	<div style="clear: both;"></div>
 </div>
 
@@ -43,7 +43,7 @@
 		<div style="background: #00F; width: 10px; height: 10px; display: inline-block;"></div> Rendering<br/>
 		<div style="background: #0F0; width: 10px; height: 10px; display: inline-block;"></div> Storing<br/>
 	</div>
-	<canvas id="total_time_one_day" width="700" height="400"></canvas>
+	<canvas id="averages_day" width="700" height="400"></canvas>
 	<div style="clear: both;"></div>
 </div>
 
@@ -55,7 +55,7 @@
 		<div style="background: #00F; width: 10px; height: 10px; display: inline-block;"></div> Rendering<br/>
 		<div style="background: #0F0; width: 10px; height: 10px; display: inline-block;"></div> Storing<br/>
 	</div>
-	<canvas id="total_time_week" width="700" height="400"></canvas>
+	<canvas id="averages_week" width="700" height="400"></canvas>
 	<div style="clear: both;"></div>
 </div>
 
@@ -98,9 +98,9 @@
 <script>
 	(function () {
 		var defaults = {animation: false, datasetFill: false, scaleFontColor: "#444", pointDot: false};
-		new Chart(document.getElementById("total_time_one_hour").getContext("2d")).Line({{total_time_hour|safe}}, defaults);
-		new Chart(document.getElementById("total_time_one_day").getContext("2d")).Line({{total_time_one_day|safe}}, defaults);
-		new Chart(document.getElementById("total_time_week").getContext("2d")).Line({{total_time_week|safe}}, defaults);
+		new Chart(document.getElementById("averages_hour").getContext("2d")).Line({{averages_hour|safe}}, defaults);
+		new Chart(document.getElementById("averages_day").getContext("2d")).Line({{averages_day|safe}}, defaults);
+		new Chart(document.getElementById("averages_week").getContext("2d")).Line({{averages_week|safe}}, defaults);
 		new Chart(document.getElementById("processed_hour").getContext("2d")).Line({{processed_hour|safe}}, defaults);
 		new Chart(document.getElementById("processed_day").getContext("2d")).Line({{processed_day|safe}}, defaults);
 		new Chart(document.getElementById("processed_week").getContext("2d")).Line({{processed_week|safe}}, defaults);

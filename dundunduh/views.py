@@ -18,6 +18,7 @@ from .util import is_allowed_file, random_alphanumeric_string
 from .util.ip import extract_remote_ip_from_headers
 from .queue import compose_animated_gif
 from . import records
+from .extensions import redis
 
 
 def register_views(app):
@@ -137,6 +138,8 @@ def register_views(app):
     def recent():
         raise NotImplemented()
 
+    STATS_CACHE_LENGTH = 60 * 5  # Cache stats for 5 minutes.
+
     @app.route('/stats')
     def stats():
         tz = timezone(app.config.get('TIMEZONE', 'UTC'))
@@ -144,115 +147,157 @@ def register_views(app):
         dt = datetime.fromtimestamp(time.time())
         dt = tz.localize(dt)
 
-        averages_week = {
-            "labels": [],
-            "datasets": [
-                {"strokeColor": "rgba(0,0,0,1)", "data": []},
-                {"strokeColor": "rgba(255,0,0,1)", "data": []},
-                {"strokeColor": "rgba(0,0,255,1)", "data": []},
-                {"strokeColor": "rgba(0,255,0,1)", "data": []}
-            ]
-        }
+        averages_week = redis.get("cache:stats:averages_week")
+        if not averages_week:
+            averages_week = {
+                "labels": [],
+                "datasets": [
+                    {"strokeColor": "rgba(0,0,0,1)", "data": []},
+                    {"strokeColor": "rgba(255,0,0,1)", "data": []},
+                    {"strokeColor": "rgba(0,0,255,1)", "data": []},
+                    {"strokeColor": "rgba(0,255,0,1)", "data": []}
+                ]
+            }
 
-        for i in xrange(7):
-            ndt = dt - timedelta(days=6 - i)
-            averages_week['labels'].append(ndt.strftime('%a'))
-            averages_week['datasets'][0]['data'].append(records.get_daily_average(ndt, 'total'))
-            averages_week['datasets'][1]['data'].append(records.get_daily_average(ndt, 'wait'))
-            averages_week['datasets'][2]['data'].append(records.get_daily_average(ndt, 'render'))
-            averages_week['datasets'][3]['data'].append(records.get_daily_average(ndt, 'store'))
+            for i in xrange(7):
+                ndt = dt - timedelta(days=6 - i)
+                averages_week['labels'].append(ndt.strftime('%a'))
+                averages_week['datasets'][0]['data'].append(records.get_daily_average(ndt, 'total'))
+                averages_week['datasets'][1]['data'].append(records.get_daily_average(ndt, 'wait'))
+                averages_week['datasets'][2]['data'].append(records.get_daily_average(ndt, 'render'))
+                averages_week['datasets'][3]['data'].append(records.get_daily_average(ndt, 'store'))
 
-        averages_day = {
-            "labels": [],
-            "datasets": [
-                {"strokeColor": "rgba(0,0,0,1)", "data": []},
-                {"strokeColor": "rgba(255,0,0,1)", "data": []},
-                {"strokeColor": "rgba(0,0,255,1)", "data": []},
-                {"strokeColor": "rgba(0,255,0,1)", "data": []}
-            ]
-        }
+            averages_week = json.dumps(averages_week)
 
-        for i in xrange(24):
-            ndt = dt - timedelta(hours=23 - i)
-            averages_day["labels"].append(ndt.strftime("%H:00"))
-            averages_day['datasets'][0]['data'].append(records.get_hourly_average(ndt, 'total'))
-            averages_day['datasets'][1]['data'].append(records.get_hourly_average(ndt, 'wait'))
-            averages_day['datasets'][2]['data'].append(records.get_hourly_average(ndt, 'render'))
-            averages_day['datasets'][3]['data'].append(records.get_hourly_average(ndt, 'store'))
+            redis.set("cache:stats:averages_week", averages_week)
+            redis.expire("cache:stats:averages_week", STATS_CACHE_LENGTH)
 
-        averages_hour = {
-            "labels": [],
-            "datasets": [
-                {"strokeColor": "rgba(0,0,0,1)", "data": []},
-                {"strokeColor": "rgba(255,0,0,1)", "data": []},
-                {"strokeColor": "rgba(0,0,255,1)", "data": []},
-                {"strokeColor": "rgba(0,255,0,1)", "data": []}
-            ]
-        }
+        averages_day = redis.get("cache:stats:averages_day")
+        if not averages_day:
+            averages_day = {
+                "labels": [],
+                "datasets": [
+                    {"strokeColor": "rgba(0,0,0,1)", "data": []},
+                    {"strokeColor": "rgba(255,0,0,1)", "data": []},
+                    {"strokeColor": "rgba(0,0,255,1)", "data": []},
+                    {"strokeColor": "rgba(0,255,0,1)", "data": []}
+                ]
+            }
 
-        for i in xrange(20):
-            segment = (dt.minute / 5) * 5
-            ndt = dt - timedelta(minutes=(dt.minute - segment) + ((19 - i) * 5))
-            averages_hour["labels"].append(ndt.strftime("%H:%M"))
-            averages_hour['datasets'][0]['data'].append(records.get_five_minute_segment_average(ndt, 'total'))
-            averages_hour['datasets'][1]['data'].append(records.get_five_minute_segment_average(ndt, 'wait'))
-            averages_hour['datasets'][2]['data'].append(records.get_five_minute_segment_average(ndt, 'render'))
-            averages_hour['datasets'][3]['data'].append(records.get_five_minute_segment_average(ndt, 'store'))
+            for i in xrange(24):
+                ndt = dt - timedelta(hours=23 - i)
+                averages_day["labels"].append(ndt.strftime("%H:00"))
+                averages_day['datasets'][0]['data'].append(records.get_hourly_average(ndt, 'total'))
+                averages_day['datasets'][1]['data'].append(records.get_hourly_average(ndt, 'wait'))
+                averages_day['datasets'][2]['data'].append(records.get_hourly_average(ndt, 'render'))
+                averages_day['datasets'][3]['data'].append(records.get_hourly_average(ndt, 'store'))
 
-        processed_week = {
-            "labels": [],
-            "datasets": [
-                {"strokeColor": "rgba(0,0,255,1)", "data": []},
-                {"strokeColor": "rgba(255,0,0,1)", "data": []},
-            ]
-        }
+            averages_day = json.dumps(averages_day)
 
-        for i in xrange(7):
-            ndt = dt - timedelta(days=6 - i)
-            processed_week['labels'].append(ndt.strftime('%a'))
-            processed_week['datasets'][0]['data'].append(records.get_daily_created(ndt))
-            processed_week['datasets'][1]['data'].append(records.get_daily_failed(ndt))
+            redis.set("cache:stats:averages_day", averages_day)
+            redis.expire("cache:stats:averages_day", STATS_CACHE_LENGTH)
 
-        processed_day = {
-            "labels": [],
-            "datasets": [
-                {"strokeColor": "rgba(0,0,255,1)", "data": []},
-                {"strokeColor": "rgba(255,0,0,1)", "data": []},
-            ]
-        }
+        averages_hour = redis.get("cache:stats:averages_hour")
+        if not averages_hour:
+            averages_hour = {
+                "labels": [],
+                "datasets": [
+                    {"strokeColor": "rgba(0,0,0,1)", "data": []},
+                    {"strokeColor": "rgba(255,0,0,1)", "data": []},
+                    {"strokeColor": "rgba(0,0,255,1)", "data": []},
+                    {"strokeColor": "rgba(0,255,0,1)", "data": []}
+                ]
+            }
 
-        for i in xrange(24):
-            ndt = dt - timedelta(hours=23 - i)
-            processed_day['labels'].append(ndt.strftime('%H:00'))
-            processed_day['datasets'][0]['data'].append(records.get_hourly_created(ndt))
-            processed_day['datasets'][1]['data'].append(records.get_hourly_failed(ndt))
+            for i in xrange(20):
+                segment = (dt.minute / 5) * 5
+                ndt = dt - timedelta(minutes=(dt.minute - segment) + ((19 - i) * 5))
+                averages_hour["labels"].append(ndt.strftime("%H:%M"))
+                averages_hour['datasets'][0]['data'].append(records.get_five_minute_segment_average(ndt, 'total'))
+                averages_hour['datasets'][1]['data'].append(records.get_five_minute_segment_average(ndt, 'wait'))
+                averages_hour['datasets'][2]['data'].append(records.get_five_minute_segment_average(ndt, 'render'))
+                averages_hour['datasets'][3]['data'].append(records.get_five_minute_segment_average(ndt, 'store'))
 
-        processed_hour = {
-            "labels": [],
-            "datasets": [
-                {"strokeColor": "rgba(0,0,255,1)", "data": []},
-                {"strokeColor": "rgba(255,0,0,1)", "data": []},
-            ]
-        }
+            averages_hour = json.dumps(averages_hour)
 
-        for i in xrange(20):
-            segment = (dt.minute / 5) * 5
-            ndt = dt - timedelta(minutes=(dt.minute - segment) + ((19 - i) * 5))
-            processed_hour['labels'].append(ndt.strftime('%H:%M'))
-            processed_hour['datasets'][0]['data'].append(records.get_five_minute_segment_created(ndt))
-            processed_hour['datasets'][1]['data'].append(records.get_five_minute_segment_failed(ndt))
+            redis.set("cache:stats:averages_hour", averages_hour)
+            redis.expire("cache:stats:averages_hour", STATS_CACHE_LENGTH)
+
+        processed_week = redis.get("cache:stats:processed_week")
+        if not processed_week:
+            processed_week = {
+                "labels": [],
+                "datasets": [
+                    {"strokeColor": "rgba(0,0,255,1)", "data": []},
+                    {"strokeColor": "rgba(255,0,0,1)", "data": []},
+                ]
+            }
+
+            for i in xrange(7):
+                ndt = dt - timedelta(days=6 - i)
+                processed_week['labels'].append(ndt.strftime('%a'))
+                processed_week['datasets'][0]['data'].append(records.get_daily_created(ndt))
+                processed_week['datasets'][1]['data'].append(records.get_daily_failed(ndt))
+
+            processed_week = json.dumps(processed_week)
+
+            redis.set("cache:stats:processed_week", processed_week)
+            redis.expire("cache:stats:processed_week", STATS_CACHE_LENGTH)
+
+        processed_day = redis.get("cache:stats:processed_day")
+        if not processed_day:
+            processed_day = {
+                "labels": [],
+                "datasets": [
+                    {"strokeColor": "rgba(0,0,255,1)", "data": []},
+                    {"strokeColor": "rgba(255,0,0,1)", "data": []},
+                ]
+            }
+
+            for i in xrange(24):
+                ndt = dt - timedelta(hours=23 - i)
+                processed_day['labels'].append(ndt.strftime('%H:00'))
+                processed_day['datasets'][0]['data'].append(records.get_hourly_created(ndt))
+                processed_day['datasets'][1]['data'].append(records.get_hourly_failed(ndt))
+
+            processed_day = json.dumps(processed_day)
+
+            redis.set("cache:stats:processed_day", processed_day)
+            redis.expire("cache:stats:processed_day", STATS_CACHE_LENGTH)
+
+        processed_hour = redis.get("cache:stats:processed_hour")
+        if not processed_hour:
+            processed_hour = {
+                "labels": [],
+                "datasets": [
+                    {"strokeColor": "rgba(0,0,255,1)", "data": []},
+                    {"strokeColor": "rgba(255,0,0,1)", "data": []},
+                ]
+            }
+
+            for i in xrange(20):
+                segment = (dt.minute / 5) * 5
+                ndt = dt - timedelta(minutes=(dt.minute - segment) + (19 - i) * 5)
+                processed_hour['labels'].append(ndt.strftime('%H:%M'))
+                processed_hour['datasets'][0]['data'].append(records.get_five_minute_segment_created(ndt))
+                processed_hour['datasets'][1]['data'].append(records.get_five_minute_segment_failed(ndt))
+
+            processed_hour = json.dumps(processed_hour)
+
+            redis.set("cache:stats:processed_hour", processed_hour)
+            redis.expire("cache:stats:processed_hour", STATS_CACHE_LENGTH)
 
         return render_template(
             "stats.html",
             all_time_created=records.get_all_time_created(),
             all_time_failed=records.get_all_time_failed(),
             all_time_average=records.get_all_time_average('total'),
-            total_time_week=json.dumps(averages_week),
-            total_time_one_day=json.dumps(averages_day),
-            total_time_hour=json.dumps(averages_hour),
-            processed_week=json.dumps(processed_week),
-            processed_day=json.dumps(processed_day),
-            processed_hour=json.dumps(processed_hour)
+            averages_week=averages_week,
+            averages_day=averages_day,
+            averages_hour=averages_hour,
+            processed_week=processed_week,
+            processed_day=processed_day,
+            processed_hour=processed_hour
         )
 
     @app.route('/job/status.json')
