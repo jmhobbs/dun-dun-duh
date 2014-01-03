@@ -82,3 +82,17 @@ def create_gif_failed(queue_time):
     pipe.incr('stats:failed:%d-%02d-%02d %02d' % (dt.year, dt.month, dt.day, dt.hour))
     pipe.incr('stats:failed:%d-%02d-%02d %02d:%02d' % (dt.year, dt.month, dt.day, dt.hour, (dt.minute / 5) * 5))
     pipe.execute()
+
+
+def get_daily_average(dt, type):
+    avg = redis.get('stats:average:%s:%d-%02d-%02d' % (type, dt.year, dt.month, dt.day))
+    if not avg:
+        return 0
+    return float(avg)
+
+
+def get_hourly_average(dt, type):
+    avg = redis.get('stats:average:%s:%d-%02d-%02d %02d' % (type, dt.year, dt.month, dt.day, dt.hour))
+    if not avg:
+        return 0
+    return float(avg)
