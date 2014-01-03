@@ -67,6 +67,11 @@ def create_gif(slug, ip, queue_time, start_rendering, wait_duration, render_dura
     rolling_average_script(keys=['stats:created', 'stats:average:render:%d-%02d-%02d %02d' % (dt.year, dt.month, dt.day, dt.hour)], args=[render_duration], client=pipe)
     rolling_average_script(keys=['stats:created', 'stats:average:store:%d-%02d-%02d %02d' % (dt.year, dt.month, dt.day, dt.hour)], args=[store_duration], client=pipe)
 
+    rolling_average_script(keys=['stats:created', 'stats:average:total:%d-%02d-%02d %02d:%02d' % (dt.year, dt.month, dt.day, dt.hour, (dt.minute / 5) * 5)], args=[total_queue_duration], client=pipe)
+    rolling_average_script(keys=['stats:created', 'stats:average:wait:%d-%02d-%02d %02d:%02d' % (dt.year, dt.month, dt.day, dt.hour, (dt.minute / 5) * 5)], args=[wait_duration], client=pipe)
+    rolling_average_script(keys=['stats:created', 'stats:average:render:%d-%02d-%02d %02d:%02d' % (dt.year, dt.month, dt.day, dt.hour, (dt.minute / 5) * 5)], args=[render_duration], client=pipe)
+    rolling_average_script(keys=['stats:created', 'stats:average:store:%d-%02d-%02d %02d:%02d' % (dt.year, dt.month, dt.day, dt.hour, (dt.minute / 5) * 5)], args=[store_duration], client=pipe)
+
     pipe.execute()
 
 
