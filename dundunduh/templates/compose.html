@@ -65,7 +65,7 @@
 						window.location.href = data.data.return_value.view_url;
 					}
 					else {
-						if( ++loop_count > 5 ) {
+						if( ++loop_count > 8 ) {
 							console.log(loop_count);
 							fail("Job timed out. We might be overloaded right now.");
 							// TODO: Cancel job?

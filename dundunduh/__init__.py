@@ -7,7 +7,7 @@ from flask import Flask
 
 from .config import BaseConfig
 from .views import register_views
-from .extensions import rq
+from .extensions import rq, redis
 
 app = Flask(__name__)
 
@@ -30,10 +30,11 @@ register_views(app)
 # Init Extensions
 
 rq.init_app(app)
-
+redis.init_app(app)
 
 ##############################
 # Configure Templating
+
 
 @app.context_processor
 def inject_globals():

@@ -7,6 +7,8 @@ class BaseConfig(object):
     DEBUG = False
     TESTING = False
 
+    TIMEZONE = "UTC"
+
     REDIS_URL = 'redis://localhost:6379/0'
 
     UPLOAD_DESTINATION = 'local'

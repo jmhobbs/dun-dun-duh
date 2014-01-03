@@ -2,6 +2,7 @@
 
 import os
 import hashlib
+import time
 
 from flask import request, url_for, render_template, send_from_directory, abort, jsonify, session
 import flask.ext.rq
@@ -10,6 +11,7 @@ import rq.job
 from PIL import Image
 
 from .util import is_allowed_file, random_alphanumeric_string
+from .util.ip import extract_remote_ip_from_headers
 from .queue import compose_animated_gif
 
 
@@ -109,16 +111,21 @@ def register_views(app):
         center_x = x + int(size * 0.5)
         center_y = y + int(size * 0.5)
 
-        job = flask.ext.rq.get_queue('default').enqueue(compose_animated_gif, slug + ".jpg", center_x, center_y, size, frames)
+        ip = extract_remote_ip_from_headers(request.headers)
+        if not ip:
+            ip = request.remote_addr
+
+        job = flask.ext.rq.get_queue('default').enqueue(compose_animated_gif, slug, center_x, center_y, size, frames, time.time(), ip)
 
         return render_template('compose.html', job_id=job.id)
 
     @app.route('/gif/<slug>')
     def view(slug):
+        filename = slug + ".gif"
         if app.config.get('UPLOAD_URL_FORMAT_STRING'):
-            image_url = app.config.get('UPLOAD_URL_FORMAT_STRING') % {"filename": slug, "extension": ".gif"}
+            image_url = app.config.get('UPLOAD_URL_FORMAT_STRING') % {"filename": filename}
         else:
-            image_url = url_for('uploaded_file', filename=slug + ".gif", _external=True)
+            image_url = url_for('uploaded_file', filename=filename, _external=True)
         return render_template('view.html', image_url=image_url)
 
     @app.route('/job/status.json')
