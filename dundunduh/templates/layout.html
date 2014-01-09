@@ -1,17 +1,16 @@
 <!doctype html>
 <html lang="en">
 	<head>
-		<meta charset="utf-8">
-		<title>{% block title %}{% endblock %}dun-dun-DUH!</title>
-		<!-- Made with Joy by What Cheer ❤ whatcheer.com -->
+    <meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>DUN-DUN-DUH! // Zoom GIF Maker</title>
 		<!--[if lt IE 9]>
 		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
 		<![endif]-->
 		{# TODO: OpenGraph tags #}
 		{# TODO: Twitter cards #}
 		{# TODO: Apple icons #}
-		<link rel="stylesheet" href="{{ url_for("static", filename="bootstrap-slate.min.css") }}" />
+		<link rel="stylesheet" href="{{ url_for("static", filename="vendor/bootstrap.min.css") }}" />
 		<link rel="stylesheet" href="{{ url_for("static", filename="style.css") }}" media="screen" />
 		{% block head %}{% endblock %}
 
@@ -32,7 +31,22 @@
 		{% endif %}
 	</head>
 	<body>
-		<div class="container">
+    <div class="navbar navbar-inverse">
+      <div class="container container-narrow">
+        <div class="navbar-header">
+					<a href="{{ url_for("index") }}" class="navbar-brand"><em>DUN-DUN-DUH!</em></a>
+				</div>
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="{{ url_for("recent") }}">Recent</a></li>
+					<li><a href="{{ url_for("stats") }}">Stats</a></li>
+					<li><a href="{{ url_for("about") }}">About</a></li>
+				</ul>
+			</div>
+		</div>
+		<div class="leader">
+			<div class="container container-narrow">{% block leader %}{% endblock %}</div>
+		</div>
+		<div class="container container-narrow">
 			{% block body %}{% endblock %}
 		</div>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>

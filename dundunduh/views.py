@@ -21,10 +21,13 @@ from . import records
 from .extensions import redis
 
 
+STATS_CACHE_LENGTH = 60 * 5  # Cache stats for 5 minutes.
+
+
 def register_views(app):
 
     #####################################################
-    # Util and static. Override these in nginx
+    # Util and static. Override these in nginx where possible.
 
     @app.route('/robots.txt')
     @app.route('/humans.txt')
@@ -78,7 +81,7 @@ def register_views(app):
 
                 im.save(os.path.join(app.config['UPLOAD_FOLDER'], filename), "JPEG", quality=80)
 
-                response['files'] = [{"name": file.filename, "id": slug, "redirect": url_for("crop_file", slug=slug, _external=True)}]
+                response['files'] = [{"name": file.filename, "id": slug, "src": url_for("uploaded_file", filename=filename, _external=True)}]
 
         response = jsonify(response)
 
@@ -93,12 +96,9 @@ def register_views(app):
 
         return response
 
-    @app.route('/crop/<slug>')
-    def crop_file(slug):
-        return render_template('crop.html', slug=slug, filename=slug + ".jpg")
-
-    @app.route('/render/<slug>', methods=('POST',))
-    def compose(slug):
+    @app.route('/render', methods=('POST',))
+    def compose():
+        slug = request.form.get('id')
         x = request.form.get('x', type=int)
         y = request.form.get('y', type=int)
         size = request.form.get('size', type=int)
@@ -123,7 +123,7 @@ def register_views(app):
 
         job = flask.ext.rq.get_queue('default').enqueue(compose_animated_gif, slug, center_x, center_y, size, frames, time.time(), ip)
 
-        return render_template('compose.html', job_id=job.id)
+        return jsonify(job_id=job.id)
 
     @app.route('/gif/<slug>')
     def view(slug):
@@ -138,7 +138,9 @@ def register_views(app):
     def recent():
         raise NotImplemented()
 
-    STATS_CACHE_LENGTH = 60 * 5  # Cache stats for 5 minutes.
+    @app.route("/about")
+    def about():
+        return render_template("about.html")
 
     @app.route('/stats')
     def stats():

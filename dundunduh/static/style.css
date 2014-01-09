@@ -1,18 +1,62 @@
-h1 {
-	text-align: center;
+@media (min-width: 768px) {
+	.container-narrow {
+  	max-width: 730px;
+	}
 }
+
 a, a:link, a:hover, a:visited {
 	color: #FFF;
-}
-.jcrop-holder {
-	margin: 0 auto;
-}
-.compose-row {
-	margin-top: 25%;
 }
 
 .alert a.btn {
 	text-decoration: none;
+}
+
+.navbar {
+	margin-bottom: 0;
+}
+
+.leader {
+	background: #E5E5E5;
+	margin-bottom: 21px;
+	border-bottom: 1px solid #BBB;
+}
+
+.container-leader h1 {
+	margin-top: 10.5px;
+}
+
+.leader h1 {
+	text-align: center;
+}
+
+/* Index Leader */
+
+#steps div {
+	float: left; 
+	width: 30%;
+	margin: 1em 3% 1em 0;
+	text-align: center;
+	font-size: 1.2em;
+	color: #999;
+}
+
+#steps div.active {
+	color: #444;
+	font-weight: bold;
+}
+
+/* Upload */
+
+#upload-row {
+	margin-top: 2em;
+	text-align: center;
+}
+
+#upload-help {
+	color: #AAA;
+	font-size: 0.8em;
+	font-weight: bold;
 }
 
 .fileinput-button {
@@ -34,5 +78,25 @@ a, a:link, a:hover, a:visited {
 }
 
 p.help-block.error {
-	color: #F00;
+	color: #F00 !important;
+}
+
+/* Crop */
+
+#crop-row {
+	text-align: center;
+}
+
+.jcrop-holder {
+	margin: 0 auto;
+}
+
+#make-the-gif-dude {
+	margin-top: 0.7em;
+}
+
+/* Compose */
+
+.compose-row {
+	margin-top: 25%;
 }
