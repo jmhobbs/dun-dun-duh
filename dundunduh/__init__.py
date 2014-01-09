@@ -3,7 +3,7 @@
 import os
 import socket
 
-from flask import Flask
+from flask import Flask, url_for
 
 from .config import BaseConfig
 from .views import register_views
@@ -34,6 +34,15 @@ redis.init_app(app)
 
 ##############################
 # Configure Templating
+
+
+@app.template_filter()
+def url_for_gif(slug):
+    filename = slug + ".gif"
+    if app.config.get('UPLOAD_URL_FORMAT_STRING'):
+        return app.config.get('UPLOAD_URL_FORMAT_STRING') % {"filename": filename}
+    else:
+        return url_for('uploaded_file', filename=filename, _external=True)
 
 
 @app.context_processor

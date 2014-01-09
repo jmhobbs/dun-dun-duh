@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<div class="row" id="recent-row">
+	{% for gif in recent %}
+	<a href="{{ url_for("view", slug=gif.slug) }}"><img src="{{ gif.slug|url_for_gif }}" alt="Loading..." /></a>
+	{% endfor %}
+</div>
+{% endblock %}

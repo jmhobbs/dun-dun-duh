@@ -100,3 +100,12 @@ p.help-block.error {
 .compose-row {
 	margin-top: 25%;
 }
+
+/* Recent View */
+
+#recent-row img {
+	width: 200px;
+	height: 200px;
+	margin: 15px;
+	float: left;
+}

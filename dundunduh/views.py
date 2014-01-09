@@ -127,16 +127,11 @@ def register_views(app):
 
     @app.route('/gif/<slug>')
     def view(slug):
-        filename = slug + ".gif"
-        if app.config.get('UPLOAD_URL_FORMAT_STRING'):
-            image_url = app.config.get('UPLOAD_URL_FORMAT_STRING') % {"filename": filename}
-        else:
-            image_url = url_for('uploaded_file', filename=filename, _external=True)
-        return render_template('view.html', image_url=image_url)
+        return render_template('view.html', slug=slug)
 
     @app.route('/recent')
     def recent():
-        raise NotImplemented()
+        return render_template("recent.html", recent=records.get_recent_gifs(9))
 
     @app.route("/about")
     def about():

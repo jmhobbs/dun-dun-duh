@@ -89,6 +89,13 @@ def create_gif_failed(queue_time):
     pipe.execute()
 
 
+def get_recent_gifs(count):
+    '''
+    Returns `count` recent GIF records sorted newest to oldest.
+    '''
+    return map(json.loads, redis.lrange('gifs', 0, count - 1))
+
+
 def get_all_time_average(type):
     avg = redis.get('stats:average:%s' % (type,))
     if not avg:
