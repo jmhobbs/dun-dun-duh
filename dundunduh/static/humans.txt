@@ -1,8 +1,4 @@
 /* TEAM */
-	Pixels: John Henry Muller
-	Twitter: @johnhenrymuller
-	From: San Francisco, CA, USA
-	
 	Codes: John Hobbs
 	Twitter: @jmhobbs
 	From: Omaha, NE, USA
@@ -10,4 +6,4 @@
 /* SITE */
 	Language: English
 	Doctype: HTML5
-	IDE: VIM, Coda 2, Fireworks, Python
+	IDE: VIM
