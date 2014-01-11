@@ -1,10 +1,13 @@
 {% extends "layout.html" %}
 
-{% block body %}
-<h1>DUN, DUN, DUH!</h1>
-<h2 style="text-align: center;">Dramatic Stats</h2>
+{% block leader %}
+<h1>Statistics &amp; Graphs</h1>
+{% endblock %}
 
-<table style="margin: 30px 0;">
+{% block body %}
+<h3 class="section-header">All Time Overview</h3>
+
+<table style="margin: 30px 0; width: 100%;" class="table table-striped">
 	<tbody>
 		<tr>
 			<th style="padding-right: 40px;">Total Created</th>
@@ -21,73 +24,73 @@
 	</tbody>
 </table>
 
-<h3>Processing Times</h3>
+<h3 class="section-header">Processing Times</h3>
 
-<div style="background: #FFF; padding: 10px 20px; width: 900px; border: 1px solid #444; border-radius: 5px;">
-	<h4 style="color: #444; text-shadow: none;">Average Rendering Times, Last Hour</h4>
-	<div style="float: right; margin: 0 10px; color: #444;">
-		<div style="background: #000; width: 10px; height: 10px; display: inline-block;"></div> Total<br/>
-		<div style="background: #F00; width: 10px; height: 10px; display: inline-block;"></div> Queue Wait<br/>
-		<div style="background: #00F; width: 10px; height: 10px; display: inline-block;"></div> Rendering<br/>
-		<div style="background: #0F0; width: 10px; height: 10px; display: inline-block;"></div> Storing<br/>
+<div class="stat">
+	<h4>Avg. Rendering Time, Last Hour</h4>
+	<div class="legend">
+		<div style="background: #000;"></div> Total<br/>
+		<div style="background: #F00;"></div> Queue Wait<br/>
+		<div style="background: #00F;"></div> Rendering<br/>
+		<div style="background: #0F0;"></div> Storing<br/>
 	</div>
-	<canvas id="averages_hour" width="700" height="400"></canvas>
+	<canvas id="averages_hour" width="575" height="300"></canvas>
 	<div style="clear: both;"></div>
 </div>
 
-<div style="background: #FFF; padding: 10px 20px; width: 900px; border: 1px solid #444; border-radius: 5px;">
-	<h4 style="color: #444; text-shadow: none;">Average Rendering Times, Last 24 Hours</h4>
-	<div style="float: right; margin: 0 10px; color: #444;">
-		<div style="background: #000; width: 10px; height: 10px; display: inline-block;"></div> Total<br/>
-		<div style="background: #F00; width: 10px; height: 10px; display: inline-block;"></div> Queue Wait<br/>
-		<div style="background: #00F; width: 10px; height: 10px; display: inline-block;"></div> Rendering<br/>
-		<div style="background: #0F0; width: 10px; height: 10px; display: inline-block;"></div> Storing<br/>
+<div class="stat">
+	<h4>Avg. Rendering Time, Last 24 Hours</h4>
+	<div class="legend">
+		<div style="background: #000;"></div> Total<br/>
+		<div style="background: #F00;"></div> Queue Wait<br/>
+		<div style="background: #00F;"></div> Rendering<br/>
+		<div style="background: #0F0;"></div> Storing<br/>
 	</div>
-	<canvas id="averages_day" width="700" height="400"></canvas>
+	<canvas id="averages_day" width="575" height="300"></canvas>
 	<div style="clear: both;"></div>
 </div>
 
-<div style="background: #FFF; padding: 10px 20px; width: 900px; border: 1px solid #444; border-radius: 5px;">
-	<h4 style="color: #444; text-shadow: none;">Average Rendering Times, This Week</h4>
-	<div style="float: right; margin: 0 10px; color: #444;">
-		<div style="background: #000; width: 10px; height: 10px; display: inline-block;"></div> Total<br/>
-		<div style="background: #F00; width: 10px; height: 10px; display: inline-block;"></div> Queue Wait<br/>
-		<div style="background: #00F; width: 10px; height: 10px; display: inline-block;"></div> Rendering<br/>
-		<div style="background: #0F0; width: 10px; height: 10px; display: inline-block;"></div> Storing<br/>
+<div class="stat">
+	<h4>Avg. Rendering Time, This Week</h4>
+	<div class="legend">
+		<div style="background: #000;"></div> Total<br/>
+		<div style="background: #F00;"></div> Queue Wait<br/>
+		<div style="background: #00F;"></div> Rendering<br/>
+		<div style="background: #0F0;"></div> Storing<br/>
 	</div>
-	<canvas id="averages_week" width="700" height="400"></canvas>
+	<canvas id="averages_week" width="575" height="300"></canvas>
 	<div style="clear: both;"></div>
 </div>
 
-<h3>Processing Totals</h3>
+<h3 class="section-header">Totals</h3>
 
-<div style="background: #FFF; padding: 10px 20px; width: 900px; border: 1px solid #444; border-radius: 5px;">
-	<h4 style="color: #444; text-shadow: none;">Total Processed, Last Hour</h4>
-	<div style="float: right; margin: 0 10px; color: #444;">
-		<div style="background: #00F; width: 10px; height: 10px; display: inline-block;"></div> Completed<br/>
-		<div style="background: #F00; width: 10px; height: 10px; display: inline-block;"></div> Failed<br/>
+<div class="stat">
+	<h4>Processed, Last Hour</h4>
+	<div class="legend">
+		<div style="background: #00F;"></div> Completed<br/>
+		<div style="background: #F00;"></div> Failed<br/>
 	</div>
-	<canvas id="processed_hour" width="700" height="400"></canvas>
+	<canvas id="processed_hour" width="575" height="300"></canvas>
 	<div style="clear: both;"></div>
 </div>
 
-<div style="background: #FFF; padding: 10px 20px; width: 900px; border: 1px solid #444; border-radius: 5px;">
-	<h4 style="color: #444; text-shadow: none;">Total Processed, Last 24 Hours</h4>
-	<div style="float: right; margin: 0 10px; color: #444;">
-		<div style="background: #00F; width: 10px; height: 10px; display: inline-block;"></div> Completed<br/>
-		<div style="background: #F00; width: 10px; height: 10px; display: inline-block;"></div> Failed<br/>
+<div class="stat">
+	<h4>Processed, Last 24 Hours</h4>
+	<div class="legend">
+		<div style="background: #00F;"></div> Completed<br/>
+		<div style="background: #F00;"></div> Failed<br/>
 	</div>
-	<canvas id="processed_day" width="700" height="400"></canvas>
+	<canvas id="processed_day" width="575" height="300"></canvas>
 	<div style="clear: both;"></div>
 </div>
 
-<div style="background: #FFF; padding: 10px 20px; width: 900px; border: 1px solid #444; border-radius: 5px;">
-	<h4 style="color: #444; text-shadow: none;">Total Processed, This Week</h4>
-	<div style="float: right; margin: 0 10px; color: #444;">
-		<div style="background: #00F; width: 10px; height: 10px; display: inline-block;"></div> Completed<br/>
-		<div style="background: #F00; width: 10px; height: 10px; display: inline-block;"></div> Failed<br/>
+<div class="stat">
+	<h4>Processed, This Week</h4>
+	<div class="legend">
+		<div style="background: #00F;"></div> Completed<br/>
+		<div style="background: #F00;"></div> Failed<br/>
 	</div>
-	<canvas id="processed_week" width="700" height="400"></canvas>
+	<canvas id="processed_week" width="575" height="300"></canvas>
 	<div style="clear: both;"></div>
 </div>
 

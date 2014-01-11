@@ -109,3 +109,37 @@ p.help-block.error {
 	margin: 15px;
 	float: left;
 }
+
+/* Stats */
+
+div.stat {
+	background: #FFF;
+	padding: 10px 20px;
+	width: 700px;
+	border: 1px solid #444;
+	border-radius: 5px;
+	margin-bottom: 20px;
+}
+
+div.stat h4 {
+	color: #444;
+	text-shadow: none;
+}
+
+div.stat div.legend {
+	float: right;
+	margin: 0;
+	color: #444;
+	font-size: 10px;
+}
+
+div.legend div {
+	width: 10px;
+	height: 10px;
+	display: inline-block;
+}
+
+.section-header {
+	margin: 40px 0;
+	border-bottom: 1px solid #BBB;
+}
