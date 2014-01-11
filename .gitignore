@@ -1,3 +1,6 @@
 *.pyc
 uploads/
 venv/
+node_modules/
+*.conf
+dundunduh/static/build/*

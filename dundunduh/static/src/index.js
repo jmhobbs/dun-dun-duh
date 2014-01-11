@@ -16,7 +16,7 @@ jQuery(function ($) {
 	];
 
 	var ddd = {},
-	    upload = $('#file').fileupload({
+      upload = $('#file').fileupload({
 				url: DDD_UPLOAD_URL,
 				dataType: 'json',
 				formData: {"upload_token": DDD_UPLOAD_TOKEN},
@@ -28,7 +28,7 @@ jQuery(function ($) {
 					$('#upload-help').removeClass('error').text('');
 					if (!(/\.(gif|jpe?g|png)$/i).test(file.name)) {
 						$('#upload-help').addClass('error').text("Please select an image file. (jpg, gif, png)");
-						return false;
+            return false;
 					}
 					else if (file.size > 6291456) {
 						$('#upload-help').addClass('error').text("Please choose a smaller image. The largest acceptable size is 6MB.");

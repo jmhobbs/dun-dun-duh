@@ -27,6 +27,7 @@ def compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip="0.0.0.0"
 
 def _do_compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip="0.0.0.0"):
     filename = slug + ".gif"
+    still_filename = slug + ".jpg"
 
     start_rendering = time.time()
 
@@ -48,16 +49,22 @@ def _do_compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip="0.0.
     times[-1] = 250
 
     output_filename = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+    first_frame_still_filename = os.path.join(current_app.config['UPLOAD_FOLDER'], still_filename)
 
     with open(output_filename, 'wb') as handle:
             make_animated_gif(handle, frames, times)
+
+    with open(first_frame_still_filename, 'wb') as handle:
+        frames[0].convert('RGB').save(handle, quality=80)
 
     done_rendering = time.time()
 
     if 's3' == current_app.config.get('UPLOAD_DESTINATION', 'local'):
         image_url = publishToS3(output_filename, filename, 'image/gif')
+        still_image_url = publishToS3(first_frame_still_filename, still_filename, 'image/jpeg')
     else:
         image_url = url_for('uploaded_file', filename=filename)
+        still_image_url = url_for('uploaded_file', filename=still_filename)
 
     done_storing = time.time()
 
@@ -74,6 +81,7 @@ def _do_compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip="0.0.
         "slug": slug,
         "view_url": url_for('view', slug=slug),
         "image_url": image_url,
+        "still_image_url": still_image_url,
         "stats": {
             "wait": wait_duration,
             "render": render_duration,
