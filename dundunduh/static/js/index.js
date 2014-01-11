@@ -43,7 +43,7 @@ jQuery(function ($) {
 					if( data.result.error === false ) {
 						$("#progress-text").text("Please Wait");
 						ddd.id = data.result.files[0].id;
-						$("#crop-image").attr("src", data.result.files[0].src);
+						setUpCrop(data.result.files[0].src);
 					}
 					else {
 						$('#progress-row').hide();
@@ -63,49 +63,52 @@ jQuery(function ($) {
 				}
 			});
 
-	$('#crop-image')
-		.on('load', function () {
-			$("#progress-row").hide();
-			$('#crop-row').show();
+		function setUpCrop (src) {
+			$('#crop-image')
+				.on('load', function () {
+					$("#progress-row").hide();
+					$('#crop-row').show();
 
-			$("#step-1").removeClass("active");
-			$("#step-2").addClass("active");
+					$("#step-1").removeClass("active");
+					$("#step-2").addClass("active");
 
-			var $img = $(this),
-					width = $img.width(),
-					height = $img.height(),
-					size, max_size, x, y;
+					var $img = $(this),
+							width = $img.width(),
+							height = $img.height(),
+							size, max_size, x, y;
 
-			if( width < height ) {
-				size = Math.max(10, Math.floor(width * 0.5));
-				max_size = Math.max(10, Math.floor(width * 0.75));
-			}
-			else {
-				size = Math.max(10, Math.floor(height * 0.5));
-				max_size = Math.max(10, Math.floor(height * 0.75));
-			}
+					if( width < height ) {
+						size = Math.max(10, Math.floor(width * 0.5));
+						max_size = Math.max(10, Math.floor(width * 0.75));
+					}
+					else {
+						size = Math.max(10, Math.floor(height * 0.5));
+						max_size = Math.max(10, Math.floor(height * 0.75));
+					}
 
-			x = Math.floor((width - size) / 2);
-			y = Math.floor((height - size) / 2);
+					x = Math.floor((width - size) / 2);
+					y = Math.floor((height - size) / 2);
 
-			$(this).Jcrop({
-				aspectRatio: 1,
-				minSize: [10, 10],
-				maxSize: [max_size, max_size],
-				allowSelect: false,
-				setSelect: [x, y, x + size, y + size],
-				onSelect: function (c) {
-					ddd.x = c.x;
-					ddd.y = c.y;
-					ddd.size = c.w;
-					$("#make-the-gif-dude").attr('disabled', false);
-				}
-			});
-		})
-		.on('error', function () {
-			$("#progress-row").hide();
-			$('#error-row').show();
-		});
+					$(this).Jcrop({
+						aspectRatio: 1,
+						minSize: [10, 10],
+						maxSize: [max_size, max_size],
+						allowSelect: false,
+						setSelect: [x, y, x + size, y + size],
+						onSelect: function (c) {
+							ddd.x = c.x;
+							ddd.y = c.y;
+							ddd.size = c.w;
+							$("#make-the-gif-dude").attr('disabled', false);
+						}
+					});
+				})
+				.on('error', function () {
+					$("#progress-row").hide();
+					$('#error-row').show();
+				})
+				.attr("src", src);
+		}
 
 		$("#make-the-gif-dude").on("click", function (e) {
 			e.preventDefault();
