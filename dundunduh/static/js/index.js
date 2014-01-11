@@ -165,7 +165,7 @@ jQuery(function ($) {
 						window.location.href = data.data.return_value.view_url;
 					}
 					else {
-						if( ++job_checks > 8 ) {
+						if( ++job_checks > 10 ) {
 							$('#progress-row').hide();
 							$('#error-row').show();
 							$.getJSON(
