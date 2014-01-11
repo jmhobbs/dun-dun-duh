@@ -89,6 +89,20 @@ def create_gif_failed(queue_time):
     pipe.execute()
 
 
+def create_gif_cancelled(queue_time):
+    tz = timezone(current_app.config.get('TIMEZONE', 'UTC'))
+
+    dt = datetime.fromtimestamp(queue_time)
+    dt = tz.localize(dt)
+
+    pipe = redis.pipeline()
+    pipe.incr('stats:cancelled')
+    pipe.incr('stats:cancelled:%d-%02d-%02d' % (dt.year, dt.month, dt.day))
+    pipe.incr('stats:cancelled:%d-%02d-%02d %02d' % (dt.year, dt.month, dt.day, dt.hour))
+    pipe.incr('stats:cancelled:%d-%02d-%02d %02d:%02d' % (dt.year, dt.month, dt.day, dt.hour, (dt.minute / 5) * 5))
+    pipe.execute()
+
+
 def get_recent_gifs(count):
     '''
     Returns `count` recent GIF records sorted newest to oldest.
@@ -175,6 +189,34 @@ def get_hourly_failed(dt):
 
 def get_five_minute_segment_failed(dt):
     count = redis.get('stats:failed:%d-%02d-%02d %02d:%02d' % (dt.year, dt.month, dt.day, dt.hour, (dt.minute / 5) * 5))
+    if not count:
+        return 0
+    return int(count)
+
+
+def get_all_time_cancelled():
+    count = redis.get('stats:cancelled')
+    if not count:
+        return 0
+    return int(count)
+
+
+def get_daily_cancelled(dt):
+    count = redis.get('stats:cancelled:%d-%02d-%02d' % (dt.year, dt.month, dt.day))
+    if not count:
+        return 0
+    return int(count)
+
+
+def get_hourly_cancelled(dt):
+    count = redis.get('stats:cancelled:%d-%02d-%02d %02d' % (dt.year, dt.month, dt.day, dt.hour))
+    if not count:
+        return 0
+    return int(count)
+
+
+def get_five_minute_segment_cancelled(dt):
+    count = redis.get('stats:cancelled:%d-%02d-%02d %02d:%02d' % (dt.year, dt.month, dt.day, dt.hour, (dt.minute / 5) * 5))
     if not count:
         return 0
     return int(count)
