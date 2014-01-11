@@ -4,10 +4,6 @@
 	}
 }
 
-a, a:link, a:hover, a:visited {
-	color: #FFF;
-}
-
 .alert a.btn {
 	text-decoration: none;
 }
