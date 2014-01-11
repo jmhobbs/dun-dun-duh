@@ -227,6 +227,7 @@ def register_views(app):
                 "datasets": [
                     {"strokeColor": "rgba(0,0,255,1)", "data": []},
                     {"strokeColor": "rgba(255,0,0,1)", "data": []},
+                    {"strokeColor": "rgba(0,255,0,1)", "data": []},
                 ]
             }
 
@@ -235,6 +236,7 @@ def register_views(app):
                 processed_week['labels'].append(ndt.strftime('%a'))
                 processed_week['datasets'][0]['data'].append(records.get_daily_created(ndt))
                 processed_week['datasets'][1]['data'].append(records.get_daily_failed(ndt))
+                processed_week['datasets'][2]['data'].append(records.get_daily_cancelled(ndt))
 
             processed_week = json.dumps(processed_week)
 
@@ -248,6 +250,7 @@ def register_views(app):
                 "datasets": [
                     {"strokeColor": "rgba(0,0,255,1)", "data": []},
                     {"strokeColor": "rgba(255,0,0,1)", "data": []},
+                    {"strokeColor": "rgba(0,255,0,1)", "data": []},
                 ]
             }
 
@@ -256,6 +259,7 @@ def register_views(app):
                 processed_day['labels'].append(ndt.strftime('%H:00'))
                 processed_day['datasets'][0]['data'].append(records.get_hourly_created(ndt))
                 processed_day['datasets'][1]['data'].append(records.get_hourly_failed(ndt))
+                processed_day['datasets'][2]['data'].append(records.get_hourly_cancelled(ndt))
 
             processed_day = json.dumps(processed_day)
 
@@ -269,6 +273,7 @@ def register_views(app):
                 "datasets": [
                     {"strokeColor": "rgba(0,0,255,1)", "data": []},
                     {"strokeColor": "rgba(255,0,0,1)", "data": []},
+                    {"strokeColor": "rgba(0,255,0,1)", "data": []},
                 ]
             }
 
@@ -278,6 +283,7 @@ def register_views(app):
                 processed_hour['labels'].append(ndt.strftime('%H:%M'))
                 processed_hour['datasets'][0]['data'].append(records.get_five_minute_segment_created(ndt))
                 processed_hour['datasets'][1]['data'].append(records.get_five_minute_segment_failed(ndt))
+                processed_hour['datasets'][2]['data'].append(records.get_five_minute_segment_cancelled(ndt))
 
             processed_hour = json.dumps(processed_hour)
 
