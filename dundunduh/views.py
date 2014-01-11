@@ -314,3 +314,19 @@ def register_views(app):
                 "return_value": job.return_value
             }
         })
+
+    @app.route('/job/cancel.json')
+    def rq_job_cancel():
+        if not request.args.get('id'):
+            return jsonify({"error": True, "message": "No job id specified."}), 400
+
+        job = rq.job.Job(request.args.get('id'), flask.ext.rq.get_connection())
+        if job:
+            job.cancel()
+
+        return jsonify({
+            "error": False,
+            "data": {
+                "id": job.id
+            }
+        })

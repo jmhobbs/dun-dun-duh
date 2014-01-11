@@ -168,6 +168,10 @@ jQuery(function ($) {
 						if( ++job_checks > 8 ) {
 							$('#progress-row').hide();
 							$('#error-row').show();
+							$.getJSON(
+								DDD_JOB_CANCEL_URL,
+								{id: ddd.job_id}
+							);
 						}
 						else {
 							setTimeout(checkJob, 1000);

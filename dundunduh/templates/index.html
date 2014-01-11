@@ -56,7 +56,8 @@
 <script>
 	var DDD_UPLOAD_URL = "{{ url_for("upload") }}",
 	    DDD_COMPOSE_URL = "{{ url_for("compose") }}",
-	    DDD_JOB_STATUS_URL = "{{ url_for("rq_job_status") }}",
+			DDD_JOB_STATUS_URL = "{{ url_for("rq_job_status") }}",
+			DDD_JOB_CANCEL_URL = "{{ url_for("rq_job_cancel") }}",
 	    DDD_UPLOAD_TOKEN = "{{ upload_token }}";
 </script>
 {% endblock %}
