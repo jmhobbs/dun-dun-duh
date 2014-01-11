@@ -321,7 +321,10 @@ def register_views(app):
             return jsonify({"error": True, "message": "No job id specified."}), 400
 
         job = rq.job.Job(request.args.get('id'), flask.ext.rq.get_connection())
+
         if job:
+            job.refresh()
+            records.create_gif_cancelled(job.args[5])
             job.cancel()
 
         return jsonify({
