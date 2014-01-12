@@ -114,6 +114,8 @@ jQuery(function ($) {
 			e.preventDefault();
 			if( $(this).is(":disabled") ) { return; }
 
+			ddd.soon = ($("#soon-frame").is(":checked")) ? 'yes' : 'no';
+
 			$("#crop-row").hide();
 			
 			$(".progress-bar").css("width", "100%");
