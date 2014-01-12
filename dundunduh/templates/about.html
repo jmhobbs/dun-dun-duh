@@ -1,5 +1,12 @@
 {% extends "layout.html" %}
 
+{% block head %}
+<meta property="og:title" content="About Dun-Dun-Duh!"/>
+<meta property="og:url" content="{{ url_for("about", _external=True) }}"/>
+<meta property="og:site_name" content="Dun-Dun-Duh!"/>
+<meta property="og:type" content="website"/>
+{% endblock %}
+
 {% block leader %}
 <h1>About</h1>
 {% endblock %}

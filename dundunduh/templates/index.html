@@ -1,6 +1,11 @@
 {% extends "layout.html" %}
 
 {% block head %}
+<meta property="og:title" content="Create a dramatci zoom gif!"/>
+<meta property="og:url" content="{{ url_for("index", _external=True) }}"/>
+<meta property="og:site_name" content="Dun-Dun-Duh!"/>
+<meta property="og:type" content="website"/>
+
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jquery-jcrop/0.9.12/css/jquery.Jcrop.min.css" type="text/css" />
 {% endblock %}
 

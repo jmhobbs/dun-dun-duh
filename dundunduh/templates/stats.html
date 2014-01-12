@@ -1,5 +1,12 @@
 {% extends "layout.html" %}
 
+{% block head %}
+<meta property="og:title" content="Statistics and Graphs"/>
+<meta property="og:url" content="{{ url_for("stats", _external=True) }}"/>
+<meta property="og:site_name" content="Dun-Dun-Duh!"/>
+<meta property="og:type" content="website"/>
+{% endblock %}
+
 {% block leader %}
 <h1>Statistics &amp; Graphs</h1>
 {% endblock %}

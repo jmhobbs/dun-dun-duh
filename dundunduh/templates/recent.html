@@ -1,5 +1,12 @@
 {% extends "layout.html" %}
 
+{% block head %}
+<meta property="og:title" content="Recent zoom gifs."/>
+<meta property="og:url" content="{{ url_for("recent", _external=True) }}"/>
+<meta property="og:site_name" content="Dun-Dun-Duh!"/>
+<meta property="og:type" content="website"/>
+{% endblock %}
+
 {% block body %}
 <div class="row" id="recent-row">
 	{% for gif in recent %}
