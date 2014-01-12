@@ -45,6 +45,15 @@ def url_for_gif(slug):
         return url_for('uploaded_file', filename=filename, _external=True)
 
 
+@app.template_filter()
+def url_for_still(slug):
+    filename = slug + ".jpg"
+    if app.config.get('UPLOAD_URL_FORMAT_STRING'):
+        return app.config.get('UPLOAD_URL_FORMAT_STRING') % {"filename": filename}
+    else:
+        return url_for('uploaded_file', filename=filename, _external=True)
+
+
 @app.context_processor
 def inject_globals():
     return dict(

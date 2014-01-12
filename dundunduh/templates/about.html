@@ -1,17 +1,25 @@
 {% extends "layout.html" %}
 
+{% block head %}
+<meta property="og:title" content="About Dun-Dun-Duh!"/>
+<meta property="og:url" content="{{ url_for("about", _external=True) }}"/>
+<meta property="og:site_name" content="Dun-Dun-Duh!"/>
+<meta property="og:type" content="website"/>
+{% endblock %}
+
 {% block leader %}
 <h1>About</h1>
 {% endblock %}
 
 {% block body %}
 <div class="row">
-	<p>Dun-Dun-Duh! was created by <a href="http://twitter.com/jmhobbs">@jmhobbs</a> as a toy for the Internet.</p>
-	<p>It has no practical intended purpose.  It's just for fun.</p>
+	<img src="{{ url_for("static", filename="avatar.jpg") }}" alt="@jmhobbs" class="avatar" />
+	<p>This service is a love letter to the Internet from <a href="http://twitter.com/jmhobbs">@jmhobbs</a>.</p>
+	<p>Have fun, work hard, be kind.</p>
 </div>
 <hr/>
 <div class="row">
-	<p>Dun-Dun-Duh! uses...</p>
+	<p>Built with...</p>
 	<ul>
 		<li><a href="http://www.python.org/">Python</a></li>
 		<li><a href="http://flask.pocoo.org/">Flask</a></li>

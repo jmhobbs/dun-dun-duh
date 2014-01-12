@@ -1,9 +1,33 @@
 {% extends "layout.html" %}
 
+{% block head %}
+<meta property="og:title" content="Recent zoom gifs."/>
+<meta property="og:url" content="{{ url_for("recent", _external=True) }}"/>
+<meta property="og:site_name" content="Dun-Dun-Duh!"/>
+<meta property="og:type" content="website"/>
+{% endblock %}
+
 {% block body %}
 <div class="row" id="recent-row">
 	{% for gif in recent %}
-	<a href="{{ url_for("view", slug=gif.slug) }}"><img src="{{ gif.slug|url_for_gif }}" alt="Loading..." /></a>
+	<a href="{{ url_for("view", slug=gif.slug) }}"><img src="{{ gif.slug|url_for_still }}" data-gif="{{ gif.slug|url_for_gif }}" alt="Loading..." /></a>
 	{% endfor %}
 </div>
+{% endblock %}
+
+{% block script %}
+<script>
+	jQuery(function ($) {
+		$("#recent-row img")
+			.hover(function () { 
+				var $img = $(this);
+				$img.data("still", $img.attr("src"));
+				$img.attr("src", $img.data("gif"));
+			},
+			function () {
+				var $img = $(this);
+				$img.attr("src", $img.data("still"));
+			});
+	});
+</script>
 {% endblock %}
