@@ -17,15 +17,15 @@ from ..crop import build_crops
 from ..records import create_gif, create_gif_failed
 
 
-def compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip="0.0.0.0"):
+def compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip="0.0.0.0", soon=False):
     try:
-        return _do_compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip)
+        return _do_compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip, soon)
     except Exception as e:
         create_gif_failed(queue_time)
         raise e
 
 
-def _do_compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip="0.0.0.0"):
+def _do_compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip="0.0.0.0", soon=False):
     filename = slug + ".gif"
     still_filename = slug + ".jpg"
 
@@ -34,7 +34,7 @@ def _do_compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip="0.0.
     im = Image.open(os.path.join(current_app.config['UPLOAD_FOLDER'], slug + ".jpg"))
     w, h = im.size
 
-    final_size = min(w, h, current_app.config.get('LONGEST_SIDE', 400))
+    final_size = current_app.config['LONGEST_SIDE']
 
     crops = build_crops(w, h, x, y, size, frame_count)
 
@@ -46,7 +46,14 @@ def _do_compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip="0.0.
         frames.append(frame.convert('P'))
         times.append(35)
 
-    times[-1] = 250
+    if soon:
+        mask = Image.open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'masks', 'soon.png'))
+        soon_frame = frames[-1].copy().convert('RGBA')
+        soon_frame.paste(mask, (0, 0), mask)
+        frames.append(soon_frame)
+        times.append(250)
+    else:
+        times[-1] = 250
 
     output_filename = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
     first_frame_still_filename = os.path.join(current_app.config['UPLOAD_FOLDER'], still_filename)

@@ -72,6 +72,7 @@ def register_views(app):
 
                 im = Image.open(file)
                 w, h = im.size
+
                 if w > app.config['LONGEST_SIDE'] or h > app.config['LONGEST_SIDE']:
                     if w > h:
                         new_size = (app.config['LONGEST_SIDE'], int(float(h) / w * app.config['LONGEST_SIDE']))
@@ -98,10 +99,13 @@ def register_views(app):
 
     @app.route('/render', methods=('POST',))
     def compose():
+        print request.form
+
         slug = request.form.get('id')
         x = request.form.get('x', type=int)
         y = request.form.get('y', type=int)
         size = request.form.get('size', type=int)
+        soon = request.form.get('soon', 'no') == 'yes'
 
         if x is None or y is None or size is None:
             abort(400)
@@ -121,7 +125,7 @@ def register_views(app):
         if not ip:
             ip = request.remote_addr
 
-        job = flask.ext.rq.get_queue('default').enqueue(compose_animated_gif, slug, center_x, center_y, size, frames, time.time(), ip)
+        job = flask.ext.rq.get_queue('default').enqueue(compose_animated_gif, slug, center_x, center_y, size, frames, time.time(), ip, soon)
 
         return jsonify(job_id=job.id)
 
