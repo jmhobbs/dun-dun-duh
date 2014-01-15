@@ -114,7 +114,7 @@ jQuery(function ($) {
 			e.preventDefault();
 			if( $(this).is(":disabled") ) { return; }
 
-			ddd.soon = ($("#soon-frame").is(":checked")) ? 'yes' : 'no';
+			ddd.final_frame = $("#final-frame").val();
 
 			$("#crop-row").hide();
 			
