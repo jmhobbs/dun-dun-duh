@@ -105,7 +105,10 @@ def register_views(app):
         x = request.form.get('x', type=int)
         y = request.form.get('y', type=int)
         size = request.form.get('size', type=int)
-        soon = request.form.get('soon', 'no') == 'yes'
+        final_frame = request.form.get('final_frame', '')
+
+        if final_frame not in ('', 'soon', 'kill-me'):
+            final_frame = ''
 
         if x is None or y is None or size is None:
             abort(400)
@@ -125,7 +128,7 @@ def register_views(app):
         if not ip:
             ip = request.remote_addr
 
-        job = flask.ext.rq.get_queue('default').enqueue(compose_animated_gif, slug, center_x, center_y, size, frames, time.time(), ip, soon)
+        job = flask.ext.rq.get_queue('default').enqueue(compose_animated_gif, slug, center_x, center_y, size, frames, time.time(), ip, final_frame)
 
         return jsonify(job_id=job.id)
 

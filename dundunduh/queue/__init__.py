@@ -17,15 +17,15 @@ from ..crop import build_crops
 from ..records import create_gif, create_gif_failed
 
 
-def compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip="0.0.0.0", soon=False):
+def compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip="0.0.0.0", final_frame=''):
     try:
-        return _do_compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip, soon)
+        return _do_compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip, final_frame)
     except Exception as e:
         create_gif_failed(queue_time)
         raise e
 
 
-def _do_compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip="0.0.0.0", soon=False):
+def _do_compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip="0.0.0.0", final_frame=''):
     filename = slug + ".gif"
     still_filename = slug + ".jpg"
 
@@ -46,8 +46,8 @@ def _do_compose_animated_gif(slug, x, y, size, frame_count, queue_time, ip="0.0.
         frames.append(frame.convert('P'))
         times.append(35)
 
-    if soon:
-        mask = Image.open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'masks', 'soon.png'))
+    if final_frame:
+        mask = Image.open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'masks', '%s.png' % final_frame))
         soon_frame = frames[-1].copy().convert('RGBA')
         soon_frame.paste(mask, (0, 0), mask)
         frames.append(soon_frame)
