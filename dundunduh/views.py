@@ -107,7 +107,7 @@ def register_views(app):
         size = request.form.get('size', type=int)
         final_frame = request.form.get('final_frame', '')
 
-        if final_frame not in ('', 'soon', 'kill-me'):
+        if final_frame not in ('', 'soon', 'kill-me', 'lod', 'oh-hai', 'wtf', 'why'):
             final_frame = ''
 
         if x is None or y is None or size is None:
